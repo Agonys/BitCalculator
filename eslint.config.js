@@ -1,7 +1,4 @@
-import prettier from 'eslint-config-prettier';
 import eslintPluginPrettier from 'eslint-plugin-prettier/recommended';
-import react from 'eslint-plugin-react';
-import reactDom from 'eslint-plugin-react-dom';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
@@ -12,34 +9,62 @@ export default tseslint
   .config(
     { ignores: ['dist'] },
     {
-      // Base and TypeScript recommended configs
-      extends: [
-        js.configs.recommended,
-        ...tseslint.configs.recommended,
-        prettier, // disables formatting rules in favor of Prettier
-      ],
-      files: ['**/*.{ts,tsx,js,jsx}'],
+      extends: [js.configs.recommended, ...tseslint.configs.recommended],
+      files: ['**/*.{ts,tsx}'],
       languageOptions: {
         ecmaVersion: 2020,
-        sourceType: 'module',
         globals: globals.browser,
       },
       plugins: {
-        react: react,
         'react-hooks': reactHooks,
         'react-refresh': reactRefresh,
       },
       rules: {
-        ...react.configs.recommended.rules,
-        ...reactDom.configs.recommended.rules,
         ...reactHooks.configs.recommended.rules,
-        'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
         'prettier/prettier': 'off',
-      },
-      settings: {
-        react: {
-          version: 'detect',
-        },
+        'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+        'react/react-in-jsx-scope': 'off',
+        '@typescript-eslint/no-unused-vars': 'warn',
+        '@typescript-eslint/consistent-type-imports': [
+          'error',
+          {
+            prefer: 'type-imports',
+            fixStyle: 'separate-type-imports',
+            disallowTypeAnnotations: false,
+          },
+        ],
+        'prettier/prettier': ['error', {}, { usePrettierrc: true }],
+        'object-curly-newline': [
+          'error',
+          {
+            ObjectExpression: {
+              multiline: true,
+              minProperties: 2,
+            },
+            ObjectPattern: {
+              multiline: true,
+              minProperties: 2,
+            },
+            ImportDeclaration: {
+              multiline: true,
+              minProperties: 2,
+            },
+            ExportDeclaration: {
+              multiline: true,
+              minProperties: 2,
+            },
+          },
+        ],
+        'comma-dangle': [
+          'error',
+          {
+            arrays: 'always-multiline',
+            objects: 'always-multiline',
+            imports: 'always-multiline',
+            exports: 'always-multiline',
+            functions: 'always-multiline',
+          },
+        ],
       },
     },
   )

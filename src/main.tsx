@@ -1,5 +1,13 @@
 import { createRoot } from 'react-dom/client';
-import './index.css';
+import { BrowserRouter } from 'react-router';
 import { App } from './App';
+import { ItemsProvider } from './contexts';
+import './index.css';
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(
+  <BrowserRouter>
+    <ItemsProvider>
+      <App />
+    </ItemsProvider>
+  </BrowserRouter>,
+);

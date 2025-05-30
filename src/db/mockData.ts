@@ -1,0 +1,51 @@
+import type { Item } from './types';
+
+export const mockData: Item[] = [
+  {
+    id: 'rough-leather-shirt',
+    name: 'Rough Leather Shirt',
+    tier: 1,
+    rarity: 'Common',
+    category: 'Leather Clothing',
+    levelReq: 1,
+    attributes: { Armor: 5, Agility: 1 },
+    materials: [
+      { id: 'rough-leather', quantity: 3 },
+      { id: 'coarse-thread', quantity: 1 },
+    ],
+    icon: '/icons/rough-leather-shirt.png',
+  },
+  {
+    id: 'rough-leather',
+    name: 'Rough Leather',
+    tier: 1,
+    rarity: 'Common',
+    category: 'Leather',
+    levelReq: 1,
+    attributes: {},
+    materials: [{ id: 'raw-hide', quantity: 2 }],
+    icon: '/icons/rough-leather.png',
+  },
+  {
+    id: 'raw-hide',
+    name: 'Raw Hide',
+    tier: 1,
+    rarity: 'Common',
+    category: 'Hide',
+    levelReq: 1,
+    attributes: {},
+    materials: [],
+    icon: '/icons/raw-hide.png',
+  },
+  {
+    id: 'coarse-thread',
+    name: 'Coarse Thread',
+    tier: 1,
+    rarity: 'Common',
+    category: 'Thread',
+    levelReq: 1,
+    attributes: {},
+    materials: [],
+    icon: '/icons/coarse-thread.png',
+  },
+];
