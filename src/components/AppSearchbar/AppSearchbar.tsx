@@ -6,6 +6,7 @@ import { getItemSuggestionsByName } from '@/db/functions';
 import { useClickOutside } from '@/hooks';
 import { debounce } from '@/lib';
 import { SearchWithSuggestions } from '../SearchWithSuggestions';
+import { SidebarTrigger } from '../ui/sidebar';
 
 export const AppSearchbar = () => {
   const { setSelectedItem } = useItemContext();
@@ -45,7 +46,8 @@ export const AppSearchbar = () => {
   };
 
   return (
-    <div className="bg-sidebar w-full p-2">
+    <div className="bg-sidebar flex w-full items-center gap-2 p-2">
+      <SidebarTrigger className="block md:hidden" />
       <SearchWithSuggestions
         isOpen={open}
         onChange={handleTermChange}

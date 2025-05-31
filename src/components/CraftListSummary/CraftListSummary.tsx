@@ -9,7 +9,7 @@ export const CraftListSummary = () => {
   return (
     <div
       className={clsx(
-        'border-foreground/20 bg-sidebar flex shrink-0 flex-col gap-4 transition-all duration-200 ease-linear',
+        'border-foreground/20 bg-sidebar hidden shrink-0 flex-col gap-4 transition-all duration-200 ease-linear md:flex',
         {
           'w-[6rem]': !isOpen,
           'w-[20rem]': isOpen,

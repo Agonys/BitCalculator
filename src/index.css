@@ -77,6 +77,22 @@
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
+  --shadow-2xs: 0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0);
+  --shadow-xs: 0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0);
+  --shadow-sm:
+    0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0), 0px 1px 2px -1px hsl(222.9114 62.6984% 50.5882% / 0);
+  --shadow: 0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0), 0px 1px 2px -1px hsl(222.9114 62.6984% 50.5882% / 0);
+  --shadow-md:
+    0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0), 0px 2px 4px -1px hsl(222.9114 62.6984% 50.5882% / 0);
+  --shadow-lg:
+    0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0), 0px 4px 6px -1px hsl(222.9114 62.6984% 50.5882% / 0);
+  --shadow-xl:
+    0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0), 0px 8px 10px -1px hsl(222.9114 62.6984% 50.5882% / 0);
+  --shadow-2xl: 0px 2px 0px 0px hsl(222.9114 62.6984% 50.5882% / 0);
+
+  --primary-foreground: var(--color-blue-50);
+  --ring: var(--color-blue-900);
+  --sidebar-ring: var(--color-blue-900);
 }
 
 @theme inline {
@@ -139,6 +155,25 @@
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
 
-body {
-  letter-spacing: var(--tracking-normal);
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    letter-spacing: var(--tracking-normal);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.borderImg {
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23333' stroke-width='4' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
 }

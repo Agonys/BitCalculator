@@ -3,3 +3,4 @@ export { PageTitle } from './PageTitle';
 export { AppSearchbar } from './AppSearchbar';
 export { CraftListSummary } from './CraftListSummary';
 export { SearchWithSuggestions } from './SearchWithSuggestions';
+export { Dropzone, PopoverDropdown } from './Inputs';
