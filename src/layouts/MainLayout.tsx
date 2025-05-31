@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router';
-import { AppSearchbar, AppSidebar } from '@/components';
+import { AppSearchbar, AppSidebar, CraftListSummary } from '@/components';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
-export const SidebarLayout = () => {
+export const MainLayout = () => {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="bg-background text-foreground h-full min-h-screen w-full">
       <AppSidebar />
       <div className="w-full">
         <AppSearchbar />
@@ -13,6 +13,7 @@ export const SidebarLayout = () => {
           <Outlet />
         </div>
       </div>
+      <CraftListSummary />
     </SidebarProvider>
   );
 };

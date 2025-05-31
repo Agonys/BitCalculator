@@ -1,12 +1,12 @@
 import { Route, Routes } from 'react-router';
-import { SidebarLayout } from './layouts/SidebarLayout';
+import { MainLayout } from './layouts/MainLayout';
 import { Editor, Main } from './pages';
 
 export const App = () => {
   return (
-    <div className="bg-background text-foreground min-h-screen">
+    <div>
       <Routes>
-        <Route element={<SidebarLayout />}>
+        <Route element={<MainLayout />}>
           <Route path="/" element={<Main />} />
           <Route path="/editor" element={<Editor />} />
         </Route>
