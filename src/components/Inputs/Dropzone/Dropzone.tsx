@@ -18,14 +18,14 @@ export const Dropzone = ({ className, onImageChange }: DropzoneProps) => {
     setIsProcessing(true);
     setIsDragging(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files?.[0]) {
       handleFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsProcessing(true);
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       handleFile(e.target.files[0]);
     }
   };
@@ -61,22 +61,26 @@ export const Dropzone = ({ className, onImageChange }: DropzoneProps) => {
 
   // Global drag detection
   useEffect(() => {
-    const handleDragEnter = (e: Event) => {
-      const event = e as unknown as DragEvent;
+    const handleDragEnter = (event: Event) => {
+      if (!(event instanceof DragEvent)) return;
+
       if (event.dataTransfer?.types?.includes('Files')) {
         setIsDragging(true);
       }
     };
 
-    const handleDragOver = (e: Event) => {
-      const event = e as unknown as DragEvent;
+    const handleDragOver = (event: Event) => {
+      if (!(event instanceof DragEvent)) return;
+
       if (event.dataTransfer?.types?.includes('Files')) {
         setIsDragging(true);
       }
     };
 
-    const handleDragLeave = (e: Event) => {
-      if ((e as unknown as DragEvent).relatedTarget === null) {
+    const handleDragLeave = (event: Event) => {
+      if (!(event instanceof DragEvent)) return;
+
+      if (event.relatedTarget === null) {
         setIsDragging(false);
       }
     };
