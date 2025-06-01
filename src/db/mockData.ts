@@ -7,7 +7,7 @@ export const mockData: Item[] = [
     tier: 1,
     rarity: 'common',
     category: 'weapon',
-    attributes: [{ name: 'shortsword damage', value: [4, 6] }],
+    attributes: [{ name: 'shortsword damage', valueMin: 4, valueMax: 6 }],
     craftOptions: [
       {
         building: 'workbench',
@@ -34,7 +34,7 @@ export const mockData: Item[] = [
         level: 1,
       },
     ],
-    attributes: [{ name: 'armor', value: 1 }],
+    attributes: [{ name: 'armor', valueMin: 1 }],
   },
   {
     id: 'grass-waistwrap',
@@ -47,7 +47,7 @@ export const mockData: Item[] = [
         level: 1,
       },
     ],
-    attributes: [{ name: 'armor', value: 1 }],
+    attributes: [{ name: 'armor', valueMin: 1 }],
   },
   {
     id: 'grass-sandals',
@@ -60,7 +60,7 @@ export const mockData: Item[] = [
         level: 1,
       },
     ],
-    attributes: [{ name: 'armor', value: 1 }],
+    attributes: [{ name: 'armor', valueMin: 1 }],
   },
   {
     id: 'hex-coin',
@@ -99,7 +99,7 @@ export const mockData: Item[] = [
     rarity: 'common',
     tier: 1,
     category: 'basic food',
-    attributes: [{ name: 'saturation', value: 25 }],
+    attributes: [{ name: 'saturation', valueMin: 25 }],
     effects: [
       {
         name: 'food regen',
@@ -173,7 +173,8 @@ export const mockData: Item[] = [
     attributes: [
       {
         name: 'shortsword damange',
-        value: [7, 10],
+        valueMin: 7,
+        valueMax: 10,
       },
     ],
   },
@@ -186,9 +187,9 @@ export const mockData: Item[] = [
     attributes: [
       {
         name: 'bow power',
-        value: 8,
+        valueMin: 8,
       },
-      { name: 'hunting bow damage', value: [10, 20] },
+      { name: 'hunting bow damage', valueMin: 10, valueMax: 20 },
     ],
     craftOptions: [
       {
@@ -219,7 +220,7 @@ export const mockData: Item[] = [
     attributes: [
       {
         name: 'hammer power',
-        value: 8,
+        valueMin: 8,
       },
     ],
     requirements: [{ level: 1, skill: 'smithing ' }],

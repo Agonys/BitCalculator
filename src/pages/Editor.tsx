@@ -1,18 +1,29 @@
 import { type ChangeEvent, type ReactNode, useMemo, useState } from 'react';
-import { CircleCheck, Minus, Plus } from 'lucide-react';
-import { Dropzone, PageTitle, PopoverDropdown, SearchWithSuggestions } from '@/components';
+import { CircleCheck, Minus, Plus, Trash2 } from 'lucide-react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import {
+  AttributesTable,
+  Dropzone,
+  PageTitle,
+  PopoverDropdown,
+  RequirementsTable,
+  SearchWithSuggestions,
+  TableInput,
+} from '@/components';
+import { EffectsTable } from '@/components/EditorParts';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Item } from '@/db';
 import { getItemSuggestionsByName } from '@/db/functions';
+import type { ItemAttribute } from '@/db/types';
 import { useClickOutside } from '@/hooks';
 import { debounce } from '@/lib';
-import { Label } from '@radix-ui/react-label';
+import { cn } from '@/lib/utils';
 
 const frameworks = [
   {
@@ -36,17 +47,21 @@ const frameworks = [
     label: 'Tier V',
   },
 ];
+
 export const Editor = () => {
   const [suggestions, setSuggestions] = useState<Item[]>([]);
   const [isSuggestionListOpen, setSuggestionListOpen] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
-  const [itemImage, setItemImage] = useState<string | null>(null);
   const [tier, setTier] = useState('');
 
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('');
+  const { control, register, handleSubmit } = useForm<Item>({
+    defaultValues: {},
+  });
 
-  const commandRef = useClickOutside<HTMLDivElement>(() => setSuggestionListOpen(false));
+  const requirementsArray = useFieldArray({ control, name: 'requirements' });
+  const attributesArray = useFieldArray({ control, name: 'attributes' });
+  const effectsArray = useFieldArray({ control, name: 'effects' });
+  const craftOptionsArray = useFieldArray({ control, name: 'craftOptions' });
 
   const debouncedItemLookup = useMemo(
     () =>
@@ -82,11 +97,18 @@ export const Editor = () => {
     setSuggestionListOpen(false);
   };
 
+  const commandRef = useClickOutside<HTMLDivElement>(() => setSuggestionListOpen(false));
+
   return (
     <>
       <PageTitle text="Recipe editor tool" description="Add or modify recipes with all possible details" />
 
-      <div className="flex w-full flex-col items-start justify-start gap-6">
+      <form
+        className="flex w-full flex-col items-start justify-start gap-6"
+        onSubmit={handleSubmit((values) => {
+          console.log(values);
+        })}
+      >
         <div className="flex w-full items-end gap-2">
           <div className="">
             <Label>Search item</Label>
@@ -113,7 +135,7 @@ export const Editor = () => {
             Reset
           </Button>
           {isNewItem && (
-            <Button variant="confirm" className="ml-auto justify-self-end">
+            <Button variant="confirm" type="submit" className="ml-auto justify-self-end">
               <CircleCheck />
               Save
             </Button>
@@ -124,29 +146,29 @@ export const Editor = () => {
             <CardContent>
               <div className="flex h-full w-full gap-12">
                 <Column>
-                  <InputContainer>
-                    <Label>Image:</Label>
-                    <Dropzone className="aspect-square h-auto max-h-54 w-full max-w-54" onImageChange={setItemImage} />
+                  <InputContainer name="Image">
+                    <Controller
+                      control={control}
+                      name="icon"
+                      render={({ field }) => (
+                        <Dropzone className="aspect-square w-54 max-w-54" onImageChange={field.onChange} />
+                      )}
+                    />
                   </InputContainer>
 
-                  <InputContainer>
-                    <Label>ID:</Label>
-                    <Input type="text" name="id" />
+                  <InputContainer name="ID">
+                    <Input type="text" {...register('id')} />
                   </InputContainer>
-                  <InputContainer>
-                    <Label>Name:</Label>
-                    <Input type="text" name="name" />
+                  <InputContainer name="Name">
+                    <Input type="text" {...register('name')} />
                   </InputContainer>
-                  <InputContainer>
-                    <Label>Tier:</Label>
+                  <InputContainer name="Tier">
                     <PopoverDropdown list={frameworks} placeholder="Select Tier..." setValue={setTier} value={tier} />
                   </InputContainer>
-                  <InputContainer>
-                    <Label>Rarity:</Label>
+                  <InputContainer name="Rarity">
                     <PopoverDropdown list={frameworks} placeholder="Select Rarity..." setValue={setTier} value={tier} />
                   </InputContainer>
-                  <InputContainer>
-                    <Label>Category:</Label>
+                  <InputContainer name="Category">
                     <PopoverDropdown
                       list={frameworks}
                       placeholder="Select Category..."
@@ -154,8 +176,7 @@ export const Editor = () => {
                       value={tier}
                     />
                   </InputContainer>
-                  <InputContainer>
-                    <Label>Entity type:</Label>
+                  <InputContainer name="Entity type">
                     <PopoverDropdown
                       list={frameworks}
                       placeholder="Select Entity Type..."
@@ -165,58 +186,71 @@ export const Editor = () => {
                   </InputContainer>
                 </Column>
                 <Column>
-                  <div className="flex flex-col gap-2"></div>
+                  <StyledAccordion name="Attributes">
+                    <NewTableEntryButton onClick={() => attributesArray.append({ name: '', valueMin: '' })} />
+                    <AttributesTable itemsArray={attributesArray} control={control} register={register} />
+                  </StyledAccordion>
 
-                  <Collapsible>
-                    <CollapsibleTrigger asChild>
-                      <div className="mb-2 flex w-full items-center justify-between gap-8">
-                        Attributes
-                        <Button size="sm" variant="confirm">
-                          <Plus />
-                        </Button>
-                      </div>
-                    </CollapsibleTrigger>
-                    <Separator />
-                    <CollapsibleContent>
-                      <Table>
-                        <TableBody className="[&>tr>td:not(:last-child)]:border-r [&>tr>td:not(:last-child)]:p-0">
-                          <TableRow>
-                            <TableCell>
-                              <input type="text" placeholder="name" className="p-2 outline-0" />
-                            </TableCell>
-                            <TableCell>
-                              {' '}
-                              <input
-                                type="text"
-                                pattern="^-?\d*\.?\d*$"
-                                placeholder="min"
-                                inputMode="decimal"
-                                className="w-full max-w-[70px] p-2 outline-0"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <input type="text" placeholder="max" className="w-full max-w-[70px] p-2 outline-0" />
-                            </TableCell>
-                            <TableCell className="p-2!">
-                              <Checkbox />
-                            </TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </CollapsibleContent>
-                  </Collapsible>
+                  <StyledAccordion name="Requirements">
+                    <NewTableEntryButton onClick={() => requirementsArray.append({ level: '' })} />
+                    <RequirementsTable control={control} itemsArray={requirementsArray} register={register} />
+                  </StyledAccordion>
+
+                  <StyledAccordion name="Effects">
+                    <NewTableEntryButton onClick={() => effectsArray.append({ name: '', attributes: [] })} />
+                    <EffectsTable control={control} itemsArray={effectsArray} register={register} />
+                  </StyledAccordion>
                 </Column>
               </div>
             </CardContent>
           </Card>
         )}
-      </div>
+      </form>
     </>
   );
 };
 
 const Column = ({ children }: { children: ReactNode }) => <div className="flex flex-col gap-4">{children}</div>;
 
-const InputContainer = ({ children }: { children: ReactNode }) => (
-  <div className="flex w-full flex-col gap-2">{children}</div>
+const InputContainer = ({ children, name }: { children: ReactNode; name: string }) => (
+  <Label className="flex w-full flex-col items-start gap-2 capitalize">
+    {name}:{children}
+  </Label>
+);
+
+const StyledAccordion = ({ name, children, className }: { name: string; children: ReactNode; className?: string }) => (
+  <Accordion type="single" collapsible>
+    <AccordionItem value={name}>
+      <AccordionTrigger className="hover:bg-background [&[data-state=open]]:bg-background [&[data-state=closed]]:border-b-border hover:border-border flex min-w-[300px] cursor-pointer items-center rounded-b-none border border-transparent capitalize hover:no-underline">
+        {name}
+      </AccordionTrigger>
+      <AccordionContent
+        className={cn(
+          'border-border flex max-h-[200px] flex-col overflow-hidden rounded-b-md border select-none',
+          className,
+        )}
+      >
+        {children}
+      </AccordionContent>
+    </AccordionItem>
+  </Accordion>
+);
+
+const NewTableEntryButton = ({ onClick }: { onClick: () => void }) => (
+  <div
+    className="w-full cursor-pointer border-b p-2"
+    onClick={onClick}
+    role="presentation"
+    tabIndex={0}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    }}
+  >
+    <div className="text-muted-foreground flex w-full items-center justify-center gap-2">
+      <Plus className="size-4" /> Add new
+    </div>
+  </div>
 );
