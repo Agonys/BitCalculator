@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction, useState } from 'react';
+import { type Dispatch, type FormEvent, type SetStateAction, useState } from 'react';
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -17,12 +17,20 @@ interface PopoverDropdownProps {
 }
 export const PopoverDropdown = ({ list, value, placeholder, setValue, onSelect }: PopoverDropdownProps) => {
   const [isOpen, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
   const handleSelect = (newValue: PopoverDropdownProps['list'][number]['value']) => {
     setValue(newValue === value ? '' : newValue);
     setOpen(false);
+    setInputValue('');
     onSelect?.();
   };
+
+  const handleInput = (value: string) => {
+    setOpen(true);
+    setInputValue(value);
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -33,14 +41,27 @@ export const PopoverDropdown = ({ list, value, placeholder, setValue, onSelect }
           className={cn('text-muted-foreground w-full justify-between', {
             'text-foreground': !!value,
           })}
+          onKeyDown={(e) => {
+            const { key } = e;
+            if (key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) return;
+
+            handleInput(value);
+          }}
         >
           {value ? list.find((framework) => framework.value === value)?.label : placeholder}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="border-input w-[200px] p-0">
+      <PopoverContent className="border-input w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput
+            placeholder="Search framework..."
+            value={inputValue}
+            onInput={(e) => {
+              const { value } = e.target as HTMLInputElement;
+              handleInput(value);
+            }}
+          />
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>

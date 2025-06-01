@@ -1,31 +1,35 @@
 type ItemCategories = string | 'weapon' | 'cosmetic clothes' | 'coins' | 'clay' | 'basic food';
-type ItemRarites = string | 'common' | 'uncommon' | '';
+type ItemRarities = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 type CraftingProfessions = string | 'carpentry' | 'foraging';
 type CrafingBuildings = string | 'workbench' | '';
 type CraftingTools = string | 'machete' | '';
 type EffectsList = string | 'food regen' | '';
 type TimeUnits = 's' | '';
 
+export interface ItemRequirement {
+  level: number | '';
+  skill?: string;
+}
+export type ItemAttribute = {
+  name: string;
+  valueMin: number | '';
+  valueMax?: number | '';
+  percentage?: boolean;
+};
+
 export interface Item {
   id: string;
   name: string;
   tier?: number;
-  rarity: ItemRarites;
+  rarity: ItemRarities;
   category: ItemCategories;
-  requirements?: Array<{
-    level: number;
-    skill?: string;
-  }>;
-  attributes?: Array<{
-    name: string;
-    value: number | number[];
-    percentage?: true;
-  }>;
+  attributes?: ItemAttribute[];
+  requirements?: ItemRequirement[];
   effects?: Array<{
     name: EffectsList;
     attributes: Array<{
       name: string;
-      value: number;
+      value: number | '';
       timeUnit: TimeUnits;
     }>;
   }>;
