@@ -1,5 +1,5 @@
 type ItemCategories = string | 'weapon' | 'cosmetic clothes' | 'coins' | 'clay' | 'basic food';
-type ItemRarites = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+type ItemRarities = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 type CraftingProfessions = string | 'carpentry' | 'foraging';
 type CrafingBuildings = string | 'workbench' | '';
 type CraftingTools = string | 'machete' | '';
@@ -21,7 +21,7 @@ export interface Item {
   id: string;
   name: string;
   tier?: number;
-  rarity: ItemRarites;
+  rarity: ItemRarities;
   category: ItemCategories;
   attributes?: ItemAttribute[];
   requirements?: ItemRequirement[];

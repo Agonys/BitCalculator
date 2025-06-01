@@ -52,7 +52,7 @@ export const AttributesTable = ({ itemsArray, control, register }: AttributesTab
             <TableCell className={cellStyleByKey('max')}>
               <TableInput type="textAsNumber" placeholder="Max" {...register(`attributes.${i}.valueMax` as const)} />
             </TableCell>
-            <TableCell className={cn('p-2!', cellStyleByKey('action'))}>
+            <TableCell className={cn('!p-2', cellStyleByKey('action'))}>
               <Controller
                 control={control}
                 name={`attributes.${i}.percentage`}
@@ -61,7 +61,7 @@ export const AttributesTable = ({ itemsArray, control, register }: AttributesTab
                 )}
               />
             </TableCell>
-            <TableCell>
+            <TableCell className={cellStyleByKey('action')}>
               <Trash2
                 tabIndex={0}
                 role="presentation"

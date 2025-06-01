@@ -42,8 +42,9 @@ export const PopoverDropdown = ({ list, value, placeholder, setValue, onSelect }
             'text-foreground': !!value,
           })}
           onKeyDown={(e) => {
-            const value = e.nativeEvent.key;
-            if (value.length > 1) return;
+            const { key } = e;
+            if (key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) return;
+
             handleInput(value);
           }}
         >

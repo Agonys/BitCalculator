@@ -172,7 +172,7 @@ export const mockData: Item[] = [
     ],
     attributes: [
       {
-        name: 'shortsword damange',
+        name: 'shortsword damage',
         valueMin: 7,
         valueMax: 10,
       },

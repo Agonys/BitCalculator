@@ -24,6 +24,7 @@ export const Dropzone = ({ className, onImageChange }: DropzoneProps) => {
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setIsProcessing(true);
     if (e.target.files && e.target.files[0]) {
       handleFile(e.target.files[0]);
     }
@@ -116,7 +117,7 @@ export const Dropzone = ({ className, onImageChange }: DropzoneProps) => {
     <div
       className={cn(
         'text-muted-foreground relative flex cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-lg border-2 border-dashed bg-transparent p-2 transition-all duration-500',
-        { 'bg-primary/20 border-primary/50 text-foregrund/10': isDragging || isProcessing },
+        { 'bg-primary/20 border-primary/50 text-foreground/10': isDragging || isProcessing },
         'hover:border-primary',
         className,
       )}
@@ -129,7 +130,7 @@ export const Dropzone = ({ className, onImageChange }: DropzoneProps) => {
       <input
         ref={inputRef}
         type="file"
-        accept="image/png, image/jpeg, image/svg, image/avif, image/webp"
+        accept="image/png, image/jpeg, image/svg+xml, image/avif, image/webp"
         className="hidden"
         onChange={handleChange}
         onClick={(e) => e.stopPropagation()}
