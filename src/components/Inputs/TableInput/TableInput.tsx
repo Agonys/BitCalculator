@@ -20,7 +20,8 @@ export const TableInput = ({ className, type, ...props }: TableInputProps) => {
       type="text"
       placeholder={props.placeholder}
       {...typeSpecificProps}
-      className={cn('w-full p-2 outline-0 focus-visible:shadow-[inset_0_0_0_1px_var(--muted-foreground)]', className)}
+      {...props}
+      className={cn('w-full p-2 outline-0', 'focus-inset-ring', 'placeholder:text-muted-foreground/45', className)}
     />
   );
 };

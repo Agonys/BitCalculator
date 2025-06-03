@@ -1,4 +1,6 @@
-export const numberToRoman = (num: number): string => {
+export const numberToRoman = (num?: number): string | null => {
+  if (!num) return null;
+
   if (num < 1 || num > 3999) return num.toString();
   const roman: [number, string][] = [
     [1000, 'M'],

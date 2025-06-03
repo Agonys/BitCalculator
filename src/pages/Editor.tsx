@@ -1,29 +1,27 @@
 import { type ChangeEvent, type ReactNode, useMemo, useState } from 'react';
-import { CircleCheck, Minus, Plus, Trash2 } from 'lucide-react';
+import { CircleCheck, Minus, Plus, Search } from 'lucide-react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import {
   AttributesTable,
+  CraftOptionsTable,
   Dropzone,
+  EffectsTable,
+  LabelContainer,
   PageTitle,
   PopoverDropdown,
   RequirementsTable,
   SearchWithSuggestions,
-  TableInput,
+  StyledAccordion,
+  TableAddRow,
 } from '@/components';
-import { EffectsTable } from '@/components/EditorParts';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Item } from '@/db';
 import { getItemSuggestionsByName } from '@/db/functions';
-import type { ItemAttribute } from '@/db/types';
 import { useClickOutside } from '@/hooks';
 import { debounce } from '@/lib';
-import { cn } from '@/lib/utils';
 
 const frameworks = [
   {
@@ -54,7 +52,7 @@ export const Editor = () => {
   const [isNewItem, setIsNewItem] = useState(false);
   const [tier, setTier] = useState('');
 
-  const { control, register, handleSubmit } = useForm<Item>({
+  const { control, register, handleSubmit, getValues, setValue } = useForm<Item>({
     defaultValues: {},
   });
 
@@ -97,20 +95,20 @@ export const Editor = () => {
     setSuggestionListOpen(false);
   };
 
+  const handleFormSubmit = (data: Item) => {
+    if (!data.id) return;
+    console.log(data);
+  };
+
   const commandRef = useClickOutside<HTMLDivElement>(() => setSuggestionListOpen(false));
 
   return (
     <>
       <PageTitle text="Recipe editor tool" description="Add or modify recipes with all possible details" />
 
-      <form
-        className="flex w-full flex-col items-start justify-start gap-6"
-        onSubmit={handleSubmit((values) => {
-          console.log(values);
-        })}
-      >
+      <form className="flex-col-gap-6 w-full items-start justify-start" onSubmit={handleSubmit(handleFormSubmit)}>
         <div className="flex w-full items-end gap-2">
-          <div className="">
+          <div className="flex-col-gap-2">
             <Label>Search item</Label>
             <SearchWithSuggestions
               isOpen={isSuggestionListOpen}
@@ -126,6 +124,7 @@ export const Editor = () => {
               ref={commandRef}
             />
           </div>
+
           <Button onClick={() => setIsNewItem(true)}>
             <Plus />
             Add new
@@ -144,9 +143,9 @@ export const Editor = () => {
         {isNewItem && (
           <Card className="w-full">
             <CardContent>
-              <div className="flex h-full w-full gap-12">
+              <div className="flex h-full w-full flex-wrap gap-12">
                 <Column>
-                  <InputContainer name="Image">
+                  <LabelContainer name="Image">
                     <Controller
                       control={control}
                       name="icon"
@@ -154,52 +153,71 @@ export const Editor = () => {
                         <Dropzone className="aspect-square w-54 max-w-54" onImageChange={field.onChange} />
                       )}
                     />
-                  </InputContainer>
+                  </LabelContainer>
 
-                  <InputContainer name="ID">
+                  <LabelContainer name="ID">
                     <Input type="text" {...register('id')} />
-                  </InputContainer>
-                  <InputContainer name="Name">
+                  </LabelContainer>
+                  <LabelContainer name="Name">
                     <Input type="text" {...register('name')} />
-                  </InputContainer>
-                  <InputContainer name="Tier">
-                    <PopoverDropdown list={frameworks} placeholder="Select Tier..." setValue={setTier} value={tier} />
-                  </InputContainer>
-                  <InputContainer name="Rarity">
+                  </LabelContainer>
+                  <LabelContainer name="Tier">
+                    <PopoverDropdown
+                      list={frameworks}
+                      placeholder="Select Tier..."
+                      setValue={setTier}
+                      value={tier}
+                      {...register('tier')}
+                    />
+                  </LabelContainer>
+                  <LabelContainer name="Rarity">
                     <PopoverDropdown list={frameworks} placeholder="Select Rarity..." setValue={setTier} value={tier} />
-                  </InputContainer>
-                  <InputContainer name="Category">
+                  </LabelContainer>
+                  <LabelContainer name="Category">
                     <PopoverDropdown
                       list={frameworks}
                       placeholder="Select Category..."
                       setValue={setTier}
                       value={tier}
                     />
-                  </InputContainer>
-                  <InputContainer name="Entity type">
+                  </LabelContainer>
+                  <LabelContainer name="Entity type">
                     <PopoverDropdown
                       list={frameworks}
                       placeholder="Select Entity Type..."
                       setValue={setTier}
                       value={tier}
                     />
-                  </InputContainer>
+                  </LabelContainer>
                 </Column>
                 <Column>
                   <StyledAccordion name="Attributes">
-                    <NewTableEntryButton onClick={() => attributesArray.append({ name: '', valueMin: '' })} />
                     <AttributesTable itemsArray={attributesArray} control={control} register={register} />
+                    <TableAddRow onClick={() => attributesArray.append({ name: '', valueMin: '' })} />
                   </StyledAccordion>
 
                   <StyledAccordion name="Requirements">
-                    <NewTableEntryButton onClick={() => requirementsArray.append({ level: '' })} />
                     <RequirementsTable control={control} itemsArray={requirementsArray} register={register} />
+                    <TableAddRow onClick={() => requirementsArray.append({ level: '' })} />
                   </StyledAccordion>
 
                   <StyledAccordion name="Effects">
-                    <NewTableEntryButton onClick={() => effectsArray.append({ name: '', attributes: [] })} />
                     <EffectsTable control={control} itemsArray={effectsArray} register={register} />
+                    <TableAddRow
+                      onClick={() =>
+                        effectsArray.append({ name: '', attributes: [{ name: '', value: '', timeUnit: '' }] })
+                      }
+                    />
                   </StyledAccordion>
+                </Column>
+                <Column>
+                  <LabelContainer name="Crafting Options" />
+                  <CraftOptionsTable
+                    control={control}
+                    itemsArray={craftOptionsArray}
+                    register={register}
+                    setValue={setValue}
+                  />
                 </Column>
               </div>
             </CardContent>
@@ -210,47 +228,4 @@ export const Editor = () => {
   );
 };
 
-const Column = ({ children }: { children: ReactNode }) => <div className="flex flex-col gap-4">{children}</div>;
-
-const InputContainer = ({ children, name }: { children: ReactNode; name: string }) => (
-  <Label className="flex w-full flex-col items-start gap-2 capitalize">
-    {name}:{children}
-  </Label>
-);
-
-const StyledAccordion = ({ name, children, className }: { name: string; children: ReactNode; className?: string }) => (
-  <Accordion type="single" collapsible>
-    <AccordionItem value={name}>
-      <AccordionTrigger className="hover:bg-background [&[data-state=open]]:bg-background [&[data-state=closed]]:border-b-border hover:border-border flex min-w-[300px] cursor-pointer items-center rounded-b-none border border-transparent capitalize hover:no-underline">
-        {name}
-      </AccordionTrigger>
-      <AccordionContent
-        className={cn(
-          'border-border flex max-h-[200px] flex-col overflow-hidden rounded-b-md border select-none',
-          className,
-        )}
-      >
-        {children}
-      </AccordionContent>
-    </AccordionItem>
-  </Accordion>
-);
-
-const NewTableEntryButton = ({ onClick }: { onClick: () => void }) => (
-  <div
-    className="w-full cursor-pointer border-b p-2"
-    onClick={onClick}
-    role="presentation"
-    tabIndex={0}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onClick();
-      }
-    }}
-  >
-    <div className="text-muted-foreground flex w-full items-center justify-center gap-2">
-      <Plus className="size-4" /> Add new
-    </div>
-  </div>
-);
+const Column = ({ children }: { children: ReactNode }) => <div className="flex-col-gap-4">{children}</div>;

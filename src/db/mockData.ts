@@ -3,6 +3,7 @@ import type { Item } from './types';
 export const mockData: Item[] = [
   {
     id: 'training-shortsword',
+    icon: 'https://i.imgur.com/QY6zecI.png',
     name: 'training shortsword',
     tier: 1,
     rarity: 'common',
@@ -25,6 +26,7 @@ export const mockData: Item[] = [
   },
   {
     id: 'grass-shirt',
+    icon: 'https://i.imgur.com/Tsp1Sae.png',
     name: 'grass shirt',
     tier: 1,
     rarity: 'common',

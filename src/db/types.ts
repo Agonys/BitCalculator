@@ -10,40 +10,45 @@ export interface ItemRequirement {
   level: number | '';
   skill?: string;
 }
-export type ItemAttribute = {
+export interface ItemAttribute {
   name: string;
   valueMin: number | '';
   valueMax?: number | '';
   percentage?: boolean;
-};
+}
+
+export interface ItemEffectAttribute {
+  name: string;
+  value: number | '';
+  timeUnit: TimeUnits;
+}
+
+export interface ItemEffect {
+  name: EffectsList;
+  attributes: ItemEffectAttribute[];
+}
+
+export interface ItemCraftOption {
+  level: number | '';
+  profession: CraftingProfessions;
+  building?: CrafingBuildings;
+  tool?: CraftingTools;
+  input: ItemMaterial[];
+  output: ItemMaterial[];
+}
 
 export interface Item {
+  icon?: string;
   id: string;
   name: string;
   tier?: number;
   rarity: ItemRarities;
   category: ItemCategories;
+  isResource?: true;
   attributes?: ItemAttribute[];
   requirements?: ItemRequirement[];
-  effects?: Array<{
-    name: EffectsList;
-    attributes: Array<{
-      name: string;
-      value: number | '';
-      timeUnit: TimeUnits;
-    }>;
-  }>;
-
-  craftOptions?: Array<{
-    level: number;
-    profession: CraftingProfessions;
-    building?: CrafingBuildings;
-    tool?: CraftingTools;
-    input: ItemMaterial[];
-    output: ItemMaterial[];
-  }>;
-  icon?: string;
-  isResource?: true;
+  effects?: ItemEffect[];
+  craftOptions?: ItemCraftOption[];
 }
 
 export interface ItemMaterial {

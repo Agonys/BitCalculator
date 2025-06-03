@@ -1,7 +1,7 @@
-import { type Dispatch, type FormEvent, type SetStateAction, useState } from 'react';
-import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { type Dispatch, type SetStateAction, useState } from 'react';
+import { CheckIcon } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
@@ -20,9 +20,9 @@ export const PopoverDropdown = ({ list, value, placeholder, setValue, onSelect }
   const [inputValue, setInputValue] = useState('');
 
   const handleSelect = (newValue: PopoverDropdownProps['list'][number]['value']) => {
-    setValue(newValue === value ? '' : newValue);
+    setValue(newValue);
     setOpen(false);
-    setInputValue('');
+    setInputValue(newValue);
     onSelect?.();
   };
 
@@ -31,10 +31,15 @@ export const PopoverDropdown = ({ list, value, placeholder, setValue, onSelect }
     setInputValue(value);
   };
 
+  const handleClear = () => {
+    setValue('');
+    setInputValue('');
+  };
+
   return (
-    <Popover open={isOpen} onOpenChange={setOpen}>
+    <Popover open={isOpen} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
-        <Button
+        {/* <Button
           variant="outline"
           role="combobox"
           aria-expanded={isOpen}
@@ -50,7 +55,26 @@ export const PopoverDropdown = ({ list, value, placeholder, setValue, onSelect }
         >
           {value ? list.find((framework) => framework.value === value)?.label : placeholder}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        </Button> */}
+        <Input
+          type="text"
+          placeholder={placeholder}
+          value={value || inputValue}
+          onChange={() => void 0}
+          onKeyDown={(e) => {
+            const { value } = e.target as HTMLInputElement;
+
+            // Allows tab navigation between inputs (Tab / Tab+Shift) and prevent
+            //  opening popup when trying to delete empty field
+            if (e.key === 'Tab' || e.key === 'Shift' || (e.key === 'Backspace' && value.length === 0)) return;
+
+            if (e.key === 'Backspace') {
+              handleClear();
+            }
+
+            handleInput(value);
+          }}
+        />
       </PopoverTrigger>
       <PopoverContent className="border-input w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <Command>

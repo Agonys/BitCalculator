@@ -10,4 +10,5 @@ export const db = new Loki('game.db');
 export const items = db.addCollection<Item>('items', { unique: ['id'] });
 
 // 3. Insert items into the collection
+(window as any).db = db;
 items.insert(mockData);

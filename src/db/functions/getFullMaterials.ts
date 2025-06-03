@@ -13,9 +13,9 @@ export function getFullMaterials(itemId: string, quantity = 1): ItemWithMaterial
   if (!item) return null;
   return {
     ...item,
-    required: item.materials.map((mat) => ({
-      material: mat,
-      item: getFullMaterials(mat.id, mat.quantity * quantity),
-    })),
+    // required: item.materials.map((mat) => ({
+    //   material: mat,
+    //   item: getFullMaterials(mat.id, mat.quantity * quantity),
+    // })),
   };
 }

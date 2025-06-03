@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ChangeEvent, Dispatch, ReactNode, RefObject, SetStateAction, SyntheticEvent } from 'react';
 import { PlusCircle, Search, X } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
@@ -15,10 +15,11 @@ interface SearchWithSuggestionsProps {
   withIcon?: boolean;
   icon?: ReactNode;
   ref?: RefObject<HTMLDivElement | null>;
+  inputValue?: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onSelect: (item: Item) => void;
   onFocus?: (e: ChangeEvent<HTMLInputElement>) => void;
   onClear?: () => void;
-  onSelect: (item: Item) => void;
   onClickOutside?: () => void;
   handleAddNew?: () => void;
 }
@@ -30,13 +31,15 @@ export const SearchWithSuggestions = ({
   withIcon,
   icon,
   ref,
+  inputValue,
   onChange,
   onFocus,
   onClear,
   onSelect,
   handleAddNew,
 }: SearchWithSuggestionsProps) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [searchTerm, setSearchTerm] = useState(inputValue ?? '');
 
   const handleTermChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -53,7 +56,11 @@ export const SearchWithSuggestions = ({
   };
 
   const handleSelect = (item: Item) => {
-    setSearchTerm('');
+    if (inputValue) {
+      handleTermChange({ target: { value: item.id } } as ChangeEvent<HTMLInputElement>);
+    } else {
+      setSearchTerm('');
+    }
     onSelect(item);
   };
 
@@ -68,6 +75,7 @@ export const SearchWithSuggestions = ({
           value={searchTerm}
           onChange={handleTermChange}
           onFocus={handleFocus}
+          ref={inputRef}
         />
         {searchTerm && (
           <button
@@ -106,11 +114,15 @@ export const SearchWithSuggestions = ({
                       onSelect={() => handleSelect(item)}
                       className="flex cursor-pointer items-center gap-3"
                     >
-                      {item.icon && <img src={item.icon} alt={item.name} className="h-6 w-6 rounded object-cover" />}
-                      <span className="font-medium">{item.name}</span>
-                      <span className="text-muted-foreground ml-auto text-xs">
-                        {item.tier && `Tier ${numberToRoman(item.tier)}`}
-                      </span>
+                      {item.icon && (
+                        <img src={item.icon} alt={item.name} className="h-10 w-10 rounded object-contain" />
+                      )}
+                      <div className="flex-col-gap-2">
+                        <span className="font-medium">{item.name}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {item.tier && `Tier ${numberToRoman(item.tier)}`}
+                        </span>
+                      </div>
                     </CommandItem>
                   ))}
                   {handleAddNew && (
