@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import type { ChangeEvent, ComponentProps } from 'react';
+import { useState } from 'react';
+import type { ComponentProps } from 'react';
 import { CircleCheck, Minus, Plus } from 'lucide-react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import {
@@ -36,14 +36,10 @@ import {
   itemRaritiesDropdownOptions,
   itemTiersDropdownOptions,
 } from '@/constants';
-import type { Item, ItemForm, TimeUnits } from '@/db';
-import { getItemSuggestionsByName } from '@/db/functions';
-import { debounce } from '@/lib';
+import type { ItemForm, TimeUnits } from '@/db';
 import type { CheckedState } from '@radix-ui/react-checkbox';
 
 export const Editor = () => {
-  const [suggestions, setSuggestions] = useState<Item[]>([]);
-  const [isSuggestionListOpen, setSuggestionListOpen] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
   const [doDefineID, setDoDefineID] = useState<CheckedState>(false);
 
@@ -55,40 +51,6 @@ export const Editor = () => {
   const attributesArray = useFieldArray({ control, name: 'attributes' });
   const effectsArray = useFieldArray({ control, name: 'effects' });
   const craftOptionsArray = useFieldArray({ control, name: 'craftOptions' });
-
-  const debouncedItemLookup = useMemo(
-    () =>
-      debounce((itemName: string) => {
-        if (!itemName.trim()) {
-          setSuggestionListOpen(false);
-          return;
-        }
-
-        const results = getItemSuggestionsByName(itemName);
-        setSuggestions(results);
-        setSuggestionListOpen(true);
-      }, 300),
-    [],
-  );
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    debouncedItemLookup(e.target.value);
-  };
-
-  const handleSelect = (item: Item) => {
-    console.log(item);
-    handleClear();
-  };
-
-  const handleClear = () => {
-    debouncedItemLookup('');
-    setSuggestionListOpen(false);
-  };
-
-  const handleAddNew = () => {
-    setIsNewItem(true);
-    setSuggestionListOpen(false);
-  };
 
   const handleFormSubmit = (data: ItemForm) => {
     // if (!data.id) return;

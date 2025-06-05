@@ -1,5 +1,3 @@
-import type { CraftingProfessions, Item, ItemCraftOption } from './db';
-
 type IsStringLiteral<T> = T extends string
   ? string extends T
     ? false // it's just 'string', not a literal

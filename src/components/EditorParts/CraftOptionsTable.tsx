@@ -1,5 +1,5 @@
 import { Fragment, type KeyboardEvent, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import {
   type Control,
   Controller,
@@ -18,7 +18,6 @@ import {
   TableCell,
   TableInput,
 } from '@/components';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   itemCraftingProfessionsDropdownOptions,

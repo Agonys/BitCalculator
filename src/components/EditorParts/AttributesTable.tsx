@@ -5,7 +5,7 @@ import { Controller } from 'react-hook-form';
 import { Table, TableCell } from '@/components/EditorParts/CustomTable';
 import { TableInput } from '@/components/Inputs';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { Item, ItemForm } from '@/db';
+import type { ItemForm } from '@/db';
 
 interface AttributesTableProps {
   itemsArray: UseFieldArrayReturn<ItemForm, 'attributes', 'id'>;

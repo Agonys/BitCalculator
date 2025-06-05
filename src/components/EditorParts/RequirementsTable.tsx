@@ -2,7 +2,7 @@ import { Fragment, type KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { Control, UseFieldArrayReturn, UseFormRegister } from 'react-hook-form';
 import { TableInput } from '@/components/Inputs';
-import type { Item, ItemForm } from '@/db';
+import type { ItemForm } from '@/db';
 import { Table, TableCell } from './CustomTable';
 
 interface RequirementsTableProps {
