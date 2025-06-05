@@ -6,7 +6,10 @@ import { cn } from '@/lib/utils';
 export const Table = ({ className, children, ...props }: ComponentProps<'div'>) => (
   <div
     role="table"
-    className={cn('grid min-h-0 flex-1 items-center justify-center overflow-hidden overflow-y-auto border', className)}
+    className={cn(
+      'grid min-h-0 flex-1 items-center justify-center overflow-hidden overflow-y-auto border border-b-0',
+      className,
+    )}
     {...props}
   >
     {children}
@@ -36,14 +39,21 @@ export const TableRow = ({ className, children, ...props }: ComponentProps<'div'
   </div>
 );
 
-export const TableCell = ({ className, children, ...props }: ComponentProps<'div'>) => (
+interface TableCellProps extends ComponentProps<'div'> {
+  isHeader?: boolean;
+}
+
+export const TableCell = ({ className, children, isHeader, ...props }: TableCellProps) => (
   <div
+    {...(props.onClick && { tabIndex: 0 })}
     role={props.onClick ? 'button' : 'cell'}
-    tabIndex={props.onClick ? 0 : -1}
     className={cn(
-      'grid-cell-center items-center border-r last:border-r-0',
+      'grid-cell-center h-full items-center border-r border-b last:border-r-0',
       {
-        'focus-inset-ring cursor-pointer': props.onClick,
+        'focus-ring-inset cursor-pointer': props.onClick,
+      },
+      {
+        'bg-muted border-b-muted-foreground/10 sticky top-0 z-10 h-full border-r-0 p-2': isHeader,
       },
       className,
     )}
@@ -61,7 +71,7 @@ interface TableAddRowProps extends Omit<ComponentProps<'div'>, 'onClick' | 'onKe
 
 export const TableAddRow = ({ className, onClick, onKeyDown, text = 'Add new' }: TableAddRowProps) => {
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (!isSubmitKey(e)) return;
+    if (e && !isSubmitKey(e)) return;
 
     e.preventDefault();
     onKeyDown?.(e);
@@ -78,9 +88,8 @@ export const TableAddRow = ({ className, onClick, onKeyDown, text = 'Add new' }:
       onKeyDown={handleKeyDown}
       role="presentation"
       className={cn(
-        'focus-inset-ring flex-gap-2 w-full cursor-pointer items-center justify-center p-2 transition-colors',
+        'focus-ring-inset flex-gap-2 w-full cursor-pointer items-center justify-center p-2 transition-colors',
         'text-muted-foreground hover:text-primary focus-visible:text-primary',
-        'border-t',
         className,
       )}
     >

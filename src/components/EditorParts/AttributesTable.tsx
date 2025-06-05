@@ -1,16 +1,16 @@
-import type { KeyboardEvent } from 'react';
+import { Fragment, type KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { Control, UseFieldArrayReturn, UseFormRegister } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
-import { Table, TableCell, TableHeader, TableRow } from '@/components/EditorParts/CustomTable';
+import { Table, TableCell } from '@/components/EditorParts/CustomTable';
 import { TableInput } from '@/components/Inputs';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { Item } from '@/db';
+import type { Item, ItemForm } from '@/db';
 
 interface AttributesTableProps {
-  itemsArray: UseFieldArrayReturn<Item, 'attributes', 'id'>;
-  register: UseFormRegister<Item>;
-  control: Control<Item>;
+  itemsArray: UseFieldArrayReturn<ItemForm, 'attributes', 'id'>;
+  register: UseFormRegister<ItemForm>;
+  control: Control<ItemForm>;
 }
 
 export const AttributesTable = ({ itemsArray, control, register }: AttributesTableProps) => {
@@ -24,16 +24,14 @@ export const AttributesTable = ({ itemsArray, control, register }: AttributesTab
   if (itemsArray.fields.length < 1) return null;
 
   return (
-    <Table className="grid-cols-[200px_70px_70px_1fr_--spacing(8)]">
-      <TableHeader>
-        <TableCell>Name</TableCell>
-        <TableCell>Min</TableCell>
-        <TableCell>Max</TableCell>
-        <TableCell>%</TableCell>
-        <TableCell />
-      </TableHeader>
+    <Table className="grid-cols-[1fr_70px_70px_--spacing(8)_--spacing(8)]">
+      <TableCell isHeader>Name</TableCell>
+      <TableCell isHeader>Min</TableCell>
+      <TableCell isHeader>Max</TableCell>
+      <TableCell isHeader>%</TableCell>
+      <TableCell isHeader />
       {itemsArray.fields.map((field, i) => (
-        <TableRow key={field.id}>
+        <Fragment key={field.id}>
           <TableCell>
             <TableInput type="text" placeholder="Name" {...register(`attributes.${i}.name` as const)} />
           </TableCell>
@@ -55,7 +53,7 @@ export const AttributesTable = ({ itemsArray, control, register }: AttributesTab
           <TableCell onClick={() => itemsArray.remove(i)} onKeyDown={(e) => handleKeyboardDelete(e, i)}>
             <Trash2 className="size-4 cursor-pointer text-red-700" />
           </TableCell>
-        </TableRow>
+        </Fragment>
       ))}
     </Table>
   );

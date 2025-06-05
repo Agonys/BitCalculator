@@ -30,7 +30,7 @@ export const AppSidebar = () => {
     },
   ];
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="z-50">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2 overflow-hidden">

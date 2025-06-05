@@ -1,3 +1,3 @@
 export { Dropzone } from './Dropzone';
-export { PopoverDropdown } from './PopoverDropdown';
+export { InputWithDropdown } from './InputWithDropdown';
 export { TableInput } from './TableInput';

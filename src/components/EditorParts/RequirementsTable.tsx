@@ -1,16 +1,14 @@
-import type { KeyboardEvent } from 'react';
+import { Fragment, type KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { Control, UseFieldArrayReturn, UseFormRegister } from 'react-hook-form';
 import { TableInput } from '@/components/Inputs';
-import type { Item } from '@/db';
-import { Table, TableCell, TableHeader, TableRow } from './CustomTable';
-
-// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import type { Item, ItemForm } from '@/db';
+import { Table, TableCell } from './CustomTable';
 
 interface RequirementsTableProps {
-  itemsArray: UseFieldArrayReturn<Item, 'requirements', 'id'>;
-  register: UseFormRegister<Item>;
-  control: Control<Item>;
+  itemsArray: UseFieldArrayReturn<ItemForm, 'requirements', 'id'>;
+  register: UseFormRegister<ItemForm>;
+  control: Control<ItemForm>;
 }
 export const RequirementsTable = ({ itemsArray, register }: RequirementsTableProps) => {
   const handleKeyboardDelete = (e: KeyboardEvent<HTMLDivElement>, i: number) => {
@@ -24,13 +22,11 @@ export const RequirementsTable = ({ itemsArray, register }: RequirementsTablePro
 
   return (
     <Table className="grid-cols-[1fr_100px_--spacing(8)]">
-      <TableHeader>
-        <TableCell>Skill</TableCell>
-        <TableCell>Level</TableCell>
-        <TableCell />
-      </TableHeader>
+      <TableCell isHeader>Skill</TableCell>
+      <TableCell isHeader>Level</TableCell>
+      <TableCell isHeader />
       {itemsArray.fields.map((field, i) => (
-        <TableRow key={field.id}>
+        <Fragment key={field.id}>
           <TableCell>
             <TableInput type="text" placeholder="Skill" {...register(`requirements.${i}.skill` as const)} />
           </TableCell>
@@ -40,7 +36,7 @@ export const RequirementsTable = ({ itemsArray, register }: RequirementsTablePro
           <TableCell onClick={() => itemsArray.remove(i)} onKeyDown={(e) => handleKeyboardDelete(e, i)}>
             <Trash2 className="size-4 cursor-pointer text-red-700" />
           </TableCell>
-        </TableRow>
+        </Fragment>
       ))}
     </Table>
   );

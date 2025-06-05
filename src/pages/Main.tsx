@@ -1,9 +1,7 @@
 import { PageTitle } from '@/components/PageTitle/PageTitle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useItemContext } from '@/contexts';
 
 export const Main = () => {
-  const { selectedItem } = useItemContext();
   return (
     <>
       <PageTitle

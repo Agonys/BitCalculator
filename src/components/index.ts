@@ -2,8 +2,8 @@ export { AppSidebar } from './AppSidebar';
 export { PageTitle } from './PageTitle';
 export { AppSearchbar } from './AppSearchbar';
 export { CraftListSummary } from './CraftListSummary';
-export { SearchWithSuggestions } from './SearchWithSuggestions';
-export { Dropzone, PopoverDropdown, TableInput } from './Inputs';
+export { SearchableItemTile, ItemTile } from './SearchableItemTile';
+export { Dropzone, InputWithDropdown, TableInput } from './Inputs';
 export {
   AttributesTable,
   RequirementsTable,

@@ -1,10 +1,25 @@
-type ItemCategories = string | 'weapon' | 'cosmetic clothes' | 'coins' | 'clay' | 'basic food';
-type ItemRarities = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-type CraftingProfessions = string | 'carpentry' | 'foraging';
-type CrafingBuildings = string | 'workbench' | '';
-type CraftingTools = string | 'machete' | '';
-type EffectsList = string | 'food regen' | '';
-type TimeUnits = 's' | '';
+import type {
+  craftingProfessions,
+  craftingStations,
+  craftingTools,
+  entityTypes,
+  itemCategories,
+  itemEffectTimeUnits,
+  itemEffects,
+  itemRarities,
+  itemTiers,
+} from '@/constants';
+import type { FormifyAllowEmptyStrings } from '@/types';
+
+export type ItemTiers = (typeof itemTiers)[number];
+export type ItemCategories = (typeof itemCategories)[number];
+export type ItemRarities = (typeof itemRarities)[number];
+export type CraftingProfessions = (typeof craftingProfessions)[number];
+export type CrafingBuildings = (typeof craftingStations)[number];
+export type CraftingTools = (typeof craftingTools)[number];
+export type EffectsList = (typeof itemEffects)[number];
+export type TimeUnits = (typeof itemEffectTimeUnits)[number];
+export type EntityType = (typeof entityTypes)[number];
 
 export interface ItemRequirement {
   level: number | '';
@@ -12,14 +27,14 @@ export interface ItemRequirement {
 }
 export interface ItemAttribute {
   name: string;
-  valueMin: number | '';
-  valueMax?: number | '';
+  valueMin: number;
+  valueMax?: number;
   percentage?: boolean;
 }
 
 export interface ItemEffectAttribute {
   name: string;
-  value: number | '';
+  value: number;
   timeUnit: TimeUnits;
 }
 
@@ -31,29 +46,35 @@ export interface ItemEffect {
 export interface ItemCraftOption {
   level: number | '';
   profession: CraftingProfessions;
-  building?: CrafingBuildings;
-  tool?: CraftingTools;
+  building?: {
+    name: CrafingBuildings;
+    tier: ItemTiers;
+  };
+  tool?: {
+    name: CraftingTools;
+    tier: ItemTiers;
+  };
   input: ItemMaterial[];
   output: ItemMaterial[];
+}
+
+export interface ItemMaterial {
+  id: Item['id'];
+  quantity: number;
 }
 
 export interface Item {
   icon?: string;
   id: string;
   name: string;
-  tier?: number;
+  tier?: ItemTiers;
   rarity: ItemRarities;
   category: ItemCategories;
-  isResource?: true;
+  entityType: EntityType;
   attributes?: ItemAttribute[];
   requirements?: ItemRequirement[];
   effects?: ItemEffect[];
   craftOptions?: ItemCraftOption[];
 }
 
-export interface ItemMaterial {
-  id: Item['id'];
-  quantity: number | number[];
-}
-
-export type ItemSuggestion = Pick<Item, 'id' | 'name' | 'tier' | 'icon'>;
+export type ItemForm = FormifyAllowEmptyStrings<Item>;

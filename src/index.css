@@ -171,7 +171,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border focus-ring;
   }
   body {
     @apply bg-background text-foreground;
@@ -189,10 +189,21 @@
     border-radius: 0px;
     background-color: var(--sidebar-border);
   }
+
+  span {
+    @apply text-sm;
+  }
 }
 
-@utility focus-inset-ring {
+@utility focus-ring {
+  @apply focus-visible:border-ring focus-visible:ring-ring transition-shadow focus-visible:ring-2 focus-visible:outline-hidden;
+}
+
+@utility focus-ring-inset {
   @apply focus-visible:border-ring focus-visible:ring-ring transition-shadow focus-visible:ring-2 focus-visible:outline-hidden focus-visible:ring-inset;
+}
+@utility focus-ring-reset {
+  @apply transition-shadow focus-visible:border-0 focus-visible:ring-0 focus-visible:outline-hidden focus-visible:ring-inset;
 }
 
 @utility flex-col-gap-* {

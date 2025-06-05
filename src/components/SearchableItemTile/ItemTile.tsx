@@ -13,17 +13,19 @@ export const ItemTile = ({ item, className, onClick }: ItemTileProps) => {
   return (
     <div
       className={cn(
-        'flex-gap-2 hover:bg-sidebar-accent/30 cursor-pointer rounded-md px-2 py-1.5 transition-colors',
+        'flex-gap-2 hover:bg-sidebar-accent/30 h-full w-full min-w-[300px] cursor-pointer items-center rounded-md px-2 py-1.5 transition-colors',
         className,
       )}
       onClick={() => onClick?.(item)}
     >
-      <img src={item.icon} alt={`${item.name}`} className="object-fit h-9 w-9" />
-      <div className="flex-col-gap-1 w-full text-xs font-medium capitalize">
-        <div className="flex w-full justify-between">
-          <span>{item.name}</span>
+      <img src={item.icon} alt={`${item.name}`} className="h-9 w-9 shrink-0 object-contain" />
+      <div className="flex-col-gap-1 w-full min-w-0 text-xs font-medium capitalize">
+        <div className="flex w-full justify-between gap-2 overflow-hidden">
+          <span className="line-clamp-1 max-w-[240px] min-w-0 text-ellipsis whitespace-normal" title={item.name}>
+            {item.name}
+          </span>
           {/* to map later on */}
-          <span className="text-[#867557]">{item.rarity}</span>
+          <span className="shrink-0 text-[#867557]">{item.rarity}</span>
         </div>
         <div className="text-muted-foreground flex w-full justify-between">
           <span>Tier {numberToRoman(item.tier)}</span>

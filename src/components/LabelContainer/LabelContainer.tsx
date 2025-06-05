@@ -1,13 +1,20 @@
-import type { ReactNode } from 'react';
-import { Label } from '../ui/label';
+import { type ReactNode, isValidElement } from 'react';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib';
 
 interface LabelContainerProps {
-  children?: ReactNode;
   name: string;
+  className?: string;
+  children?: ReactNode;
 }
 
-export const LabelContainer = ({ children, name }: LabelContainerProps) => (
-  <Label className="flex w-full flex-col items-start gap-2 capitalize">
-    {name}:{children}
-  </Label>
-);
+export const LabelContainer = ({ name, className, children }: LabelContainerProps) => {
+  const hasDirectInputElement = isValidElement(children) ? children.type === 'input' : false;
+  const Component = hasDirectInputElement ? Label : 'span';
+  return (
+    <Component className={cn('flex-col-gap-2 w-full items-start', className)}>
+      <span className="w-full capitalize">{name}</span>
+      {children}
+    </Component>
+  );
+};
