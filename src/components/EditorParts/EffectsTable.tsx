@@ -1,13 +1,7 @@
 import { Fragment } from 'react';
 import type { KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
-import {
-  type Control,
-  Controller,
-  type FieldErrors,
-  type UseFieldArrayReturn,
-  type UseFormRegister,
-} from 'react-hook-form';
+import { type Control, Controller, type FieldErrors, type UseFieldArrayReturn } from 'react-hook-form';
 import type { ItemForm } from '@/db';
 import { cn, isSubmitKey } from '@/lib';
 import { TableInput } from '../Inputs';

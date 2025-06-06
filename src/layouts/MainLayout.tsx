@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router';
-import { AppSearchbar, AppSidebar, CraftListSummary } from '@/components';
+import { AppSearchbar, AppSidebar } from '@/components';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 export const MainLayout = () => {

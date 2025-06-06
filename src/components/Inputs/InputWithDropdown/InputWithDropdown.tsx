@@ -16,19 +16,21 @@ interface DropdownProps {
   value?: string | number;
   triggerClassName?: string;
   hasError?: boolean;
+  disabled?: boolean;
   onChange?: (value: string | number) => void;
 }
 
 type PortalCSSProps = CSSProperties & Record<string, string | number>;
 
-export const InputWithDropdown: React.FC<DropdownProps> = ({
+export const InputWithDropdown = ({
   list,
   placeholder,
   value,
   triggerClassName,
   hasError,
+  disabled,
   onChange,
-}) => {
+}: DropdownProps) => {
   const [open, setOpen] = useState(false); // controls transition state
   const [show, setShow] = useState(false); // controls mounting
   const [search, setSearch] = useState('');
@@ -280,14 +282,21 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
           'focus-ring-inset border-input hover:bg-accent text-muted-foreground text-sm transition-[background-color,border-color]',
           selectedLabel && 'text-white',
           hasError && 'ring-destructive ring-2 ring-inset',
+          disabled && 'text-muted-foreground cursor-not-allowed opacity-50 hover:bg-transparent',
           triggerClassName,
         )}
         title={selectedLabel}
         onClick={() => {
+          if (disabled) return;
+
           if (!show) openDropdown();
           else closeDropdown();
         }}
-        onKeyDown={handleKeyDown}
+        onKeyDown={(e) => {
+          if (disabled) return;
+
+          handleKeyDown(e);
+        }}
         aria-haspopup="listbox"
         aria-expanded={show}
       >

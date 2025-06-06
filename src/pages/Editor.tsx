@@ -1,6 +1,6 @@
-import { forwardRef, useState } from 'react';
+import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { ChevronDownIcon, CircleCheck, Minus, Plus } from 'lucide-react';
+import { CircleCheck, Minus, Plus } from 'lucide-react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import {
   AttributesTable,

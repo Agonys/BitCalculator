@@ -23,6 +23,8 @@ import {
 import type { Item, ItemForm } from '@/db';
 import { getItemSuggestionsByName } from '@/db/functions';
 import { cn, isSubmitKey } from '@/lib';
+import { Separator } from '../ui/separator';
+import { Switch } from '../ui/switch';
 
 interface CraftOptionsTableProps {
   itemsArray: UseFieldArrayReturn<ItemForm, 'craftOptions', 'id'>;
@@ -30,8 +32,26 @@ interface CraftOptionsTableProps {
   register: UseFormRegister<ItemForm>;
   errors: FieldErrors<ItemForm>;
 }
+
 export const CraftOptionsTable = ({ itemsArray, control, errors, register }: CraftOptionsTableProps) => {
   const [suggestions, setSuggestions] = useState<Item[] | null>([]);
+  const [optionsWithEnabledFeatures, setOptionsWithEnabledFeatures] = useState<string[]>([]);
+
+  const handleOptionToggleFeature = (optionId: string, feature: string) => {
+    const key = `${optionId}-${feature}`;
+
+    setOptionsWithEnabledFeatures((prev) => {
+      if (prev.some((v) => v === key)) {
+        return prev.filter((v) => v !== key);
+      }
+
+      return [...prev, key];
+    });
+  };
+
+  const isOptionFeatureEnabled = (optionId: string, feature: string) => {
+    return optionsWithEnabledFeatures.some((option) => option === `${optionId}-${feature}`);
+  };
 
   const handleClearSuggestions = () => setSuggestions(null);
 
@@ -89,8 +109,8 @@ export const CraftOptionsTable = ({ itemsArray, control, errors, register }: Cra
     <>
       {itemsArray.fields.map((field, i) => (
         <StyledAccordion key={field.id} name={`Option ${i + 1}`} defaultOpen={true} className="flex flex-col gap-2 p-4">
-          <div className="flex flex-wrap items-end gap-6">
-            <div className="flex gap-6">
+          <div className="relative flex flex-wrap gap-6 pr-10">
+            <div className="flex flex-col gap-2">
               <LabelContainer name="Level">
                 <Controller
                   control={control}
@@ -125,76 +145,107 @@ export const CraftOptionsTable = ({ itemsArray, control, errors, register }: Cra
                 />
               </LabelContainer>
             </div>
-            <div className="flex gap-6">
-              <LabelContainer name="Tool Name">
-                <Controller
-                  control={control}
-                  name={`craftOptions.${i}.tool.name`}
-                  render={({ field }) => (
-                    <InputWithDropdown
-                      list={itemCraftingToolsDropdownOptions}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Select Tool..."
-                    />
-                  )}
+            {/*  */}
+            {/*  */}
+            {/* we need to pass errors whenever those occur but once there's a proper value remove destructive highlight and move on to next element */}
+            {/* Also adding remaining errors to dropdowns and input/output table ( I expect a harsh one) */}
+            {/*  */}
+            {/*  */}
+            <div className="flex h-min flex-col gap-2 rounded-md border p-2 py-4">
+              <div className="flex gap-2">
+                <Switch
+                  className="cursor-pointer"
+                  onCheckedChange={() => handleOptionToggleFeature(field.id, 'tool')}
                 />
-              </LabelContainer>
-              <LabelContainer name="Tool Tier">
-                <Controller
-                  control={control}
-                  name={`craftOptions.${i}.tool.tier`}
-                  render={({ field }) => (
-                    <InputWithDropdown
-                      list={itemTiersDropdownOptions}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Select tier..."
-                    />
-                  )}
-                />
-              </LabelContainer>
+                <p className="font-semibold">Enable Tool</p>
+              </div>
+              <Separator />
+              <div className="flex gap-6">
+                <LabelContainer name="Tool Name">
+                  <Controller
+                    control={control}
+                    name={`craftOptions.${i}.tool.name`}
+                    render={({ field: controllerField }) => (
+                      <InputWithDropdown
+                        list={itemCraftingToolsDropdownOptions}
+                        value={controllerField.value}
+                        onChange={controllerField.onChange}
+                        placeholder="Select Tool..."
+                        disabled={!isOptionFeatureEnabled(field.id, 'tool')}
+                      />
+                    )}
+                  />
+                </LabelContainer>
+                <LabelContainer name="Tool Tier">
+                  <Controller
+                    control={control}
+                    name={`craftOptions.${i}.tool.tier`}
+                    render={({ field: controllerField }) => (
+                      <InputWithDropdown
+                        list={itemTiersDropdownOptions}
+                        value={controllerField.value}
+                        onChange={controllerField.onChange}
+                        placeholder="Select tier..."
+                        disabled={!isOptionFeatureEnabled(field.id, 'tool')}
+                      />
+                    )}
+                  />
+                </LabelContainer>
+              </div>
             </div>
-            <div className="flex gap-6">
-              <LabelContainer name="Building Name">
-                <Controller
-                  control={control}
-                  name={`craftOptions.${i}.building.name`}
-                  render={({ field }) => (
-                    <InputWithDropdown
-                      list={itemCraftingStationsDropdownOptions}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Select Building..."
-                      triggerClassName="min-w-[200px]"
-                    />
-                  )}
+
+            <div className="flex h-min flex-col gap-2 rounded-md border p-2 py-4">
+              <div className="flex gap-2">
+                <Switch
+                  className="cursor-pointer"
+                  onCheckedChange={() => handleOptionToggleFeature(field.id, 'building')}
                 />
-              </LabelContainer>
-              <LabelContainer name="Building Tier">
-                <Controller
-                  control={control}
-                  name={`craftOptions.${i}.building.tier`}
-                  render={({ field }) => (
-                    <InputWithDropdown
-                      list={itemTiersDropdownOptions}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Select tier..."
-                    />
-                  )}
-                />
-              </LabelContainer>
+                <p className="font-semibold">Enable Building</p>
+              </div>
+              <Separator />
+              <div className="flex gap-6">
+                <LabelContainer name="Building Name">
+                  <Controller
+                    control={control}
+                    name={`craftOptions.${i}.building.name`}
+                    render={({ field: controllerField }) => (
+                      <InputWithDropdown
+                        list={itemCraftingStationsDropdownOptions}
+                        value={controllerField.value}
+                        onChange={controllerField.onChange}
+                        placeholder="Select Building..."
+                        triggerClassName="min-w-[200px]"
+                        disabled={!isOptionFeatureEnabled(field.id, 'building')}
+                      />
+                    )}
+                  />
+                </LabelContainer>
+                <LabelContainer name="Building Tier">
+                  <Controller
+                    control={control}
+                    name={`craftOptions.${i}.building.tier`}
+                    render={({ field: controllerField }) => (
+                      <InputWithDropdown
+                        list={itemTiersDropdownOptions}
+                        value={controllerField.value}
+                        onChange={controllerField.onChange}
+                        placeholder="Select tier..."
+                        disabled={!isOptionFeatureEnabled(field.id, 'building')}
+                      />
+                    )}
+                  />
+                </LabelContainer>
+              </div>
             </div>
             <div
               tabIndex={0}
               role="button"
               aria-label={`Remove crafting option ${i + 1}`}
-              className="focus-ring-inset cursor-pointer rounded-md p-2"
+              className="focus-ring-inset absolute top-0 right-0 cursor-pointer p-2 text-red-700 transition-colors hover:text-red-500"
               onClick={() => removeCraftingOption(i)}
               onKeyDown={(e) => removeCraftingOption(i, e)}
             >
-              <Trash2 size={30} className="text-red-700" />
+              <Trash2 size={24} />
             </div>
           </div>
 
