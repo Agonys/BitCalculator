@@ -26,13 +26,14 @@ function InputIcon({ children, className }: { children: React.ReactNode; classNa
 }
 
 const inputVariants = cva(
-  'flex h-9 w-full rounded-md bg-transparent border px-3 py-1 text-base transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm font-light',
+  'flex h-9 w-full rounded-md bg-transparent border px-3 py-1 text-base transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground  disabled:cursor-not-allowed disabled:opacity-50 md:text-sm font-light focus-ring-inset',
   {
     variants: {
       variant: {
-        default: 'border-input shadow-xs focus-visible:ring-ring',
-        destructive: 'border-destructive shadow-xs focus-visible:ring-destructive',
-        ghost: 'border-transparent -mx-3 -my-1 focus-visible:ring-ring',
+        default: 'border-input shadow-xs',
+        destructive: 'focus-ring-inset-destructive',
+        ghost: 'border-transparent -mx-3 -my-1',
+        error: 'ring-destructive ring-2 ring-inset',
       },
     },
     defaultVariants: {

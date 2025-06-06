@@ -1,2 +1,2 @@
-export { getFullMaterials } from './getFullMaterials';
 export { getItemSuggestionsByName } from './getItemSuggestionsByName';
+export { getItemById, getItemByName } from './getItem';

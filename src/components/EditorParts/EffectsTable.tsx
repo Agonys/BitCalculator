@@ -1,177 +1,170 @@
-import { Fragment, type KeyboardEvent } from 'react';
-import { CornerDownRight, Plus, Trash2 } from 'lucide-react';
-import { type Control, type UseFieldArrayReturn, type UseFormRegister, useFieldArray } from 'react-hook-form';
-import type { Item } from '@/db';
-import { cn } from '@/lib/utils';
+import { Fragment } from 'react';
+import type { KeyboardEvent } from 'react';
+import { Trash2 } from 'lucide-react';
+import { type Control, Controller, type FieldErrors, type UseFieldArrayReturn } from 'react-hook-form';
+import type { ItemForm } from '@/db';
+import { cn, isSubmitKey } from '@/lib';
 import { TableInput } from '../Inputs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Table, TableAddRow, TableCell } from './CustomTable';
 
 interface EffectsTableProps {
-  itemsArray: UseFieldArrayReturn<Item, 'effects', 'id'>;
-  register: UseFormRegister<Item>;
-  control: Control<Item>;
+  itemsArray: UseFieldArrayReturn<ItemForm, 'effects', 'id'>;
+  control: Control<ItemForm>;
+  errors: FieldErrors<ItemForm>;
 }
-export const EffectsTable = ({ itemsArray, register, control }: EffectsTableProps) => {
-  const handleKeyboardDelete = (e: KeyboardEvent<SVGSVGElement>, i: number) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      itemsArray.remove(i);
-    }
+
+export const EffectsTable = ({ itemsArray, control, errors }: EffectsTableProps) => {
+  const handleRemoveEffect = (effectIndex: number, e?: KeyboardEvent<HTMLDivElement>) => {
+    if (e && !isSubmitKey(e)) return;
+
+    e?.preventDefault();
+    itemsArray.remove(effectIndex);
   };
 
-  const cellStyleByKey = (key: 'skill' | 'level' | 'action') => {
-    return cn({
-      'max-w-[200px] min-w-[200px]': key === 'skill',
-      'max-w-[70px] min-w-[70px]': key === 'level',
-      'max-w-8 w-8': key === 'action',
+  const handleAddAttribute = (effectIndex: number, e?: KeyboardEvent<HTMLDivElement>) => {
+    if (e && !isSubmitKey(e)) return;
+
+    const currentEffect = itemsArray.fields[effectIndex];
+
+    itemsArray.update(effectIndex, {
+      ...currentEffect,
+      attributes: [...currentEffect.attributes, { name: '', timeUnit: '', value: '' }],
+    });
+  };
+
+  const handleRemoveAttribute = (effectIndex: number, attrIndex: number, e?: KeyboardEvent<HTMLDivElement>) => {
+    if (e && !isSubmitKey(e)) return;
+
+    const currentEffect = itemsArray.fields[effectIndex];
+
+    if (currentEffect.attributes.length === 1) return;
+
+    itemsArray.update(effectIndex, {
+      ...currentEffect,
+      attributes: currentEffect.attributes.filter((_, i) => i !== attrIndex),
     });
   };
 
   if (itemsArray.fields.length < 1) return null;
+
   return (
-    <Table className="[&_td]:p-0 [&_td:not(:last-child)]:border-r">
-      <TableHeader>
-        <TableRow>
-          <TableHead className="max-w-8 min-w-8">1</TableHead>
-          <TableHead className="w-full">2</TableHead>
-          <TableHead className="max-w-8 min-w-8">3</TableHead>
-          <TableHead className="max-w-8 min-w-8">4</TableHead>
-          <TableHead className="max-w-8 min-w-8">5</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {itemsArray.fields.map((field, i) => {
-          return (
-            <Fragment key={field.id}>
-              {/* Effect Row */}
-              <TableRow>
-                <TableCell colSpan={4}>
-                  <TableInput type="text" placeholder="Effect name" {...register(`effects.${i}.name` as const)} />
+    <Table className="grid-cols-[--spacing(8)_1fr_100px_100px_--spacing(8)]">
+      <TableCell isHeader className="col-span-2">
+        Effect / Attribute Name
+      </TableCell>
+      <TableCell isHeader>Value</TableCell>
+      <TableCell isHeader>Unit</TableCell>
+      <TableCell isHeader />
+
+      {itemsArray.fields.map((field, i) => {
+        return (
+          <Fragment key={field.id}>
+            {i !== 0 && <TableCell className="bg-border col-span-5 h-2 border-0"></TableCell>}
+            <TableCell className="col-span-4">
+              <Controller
+                control={control}
+                name={`effects.${i}.name`}
+                rules={{
+                  required: 'Effect name is required if present',
+                }}
+                render={({ field }) => (
+                  <TableInput
+                    type="text"
+                    placeholder="Effect name"
+                    {...field}
+                    error={errors.effects?.[i]?.name?.message}
+                  />
+                )}
+              />
+            </TableCell>
+            <TableCell
+              onClick={() => handleRemoveEffect(i)}
+              onKeyDown={(e) => handleRemoveEffect(i, e)}
+              tabIndex={0}
+              className="cursor-pointer border-r-0 text-red-700"
+            >
+              <Trash2 className="size-4" />
+            </TableCell>
+
+            {field.attributes.map((_, j) => (
+              <Fragment key={`${field.id}-${j}`}>
+                <TableCell>
+                  <div className="bg-muted-foreground h-full w-0.5 justify-self-center"></div>
                 </TableCell>
-                <TableCell className="w-8 max-w-8">
-                  <Trash2
-                    tabIndex={0}
-                    role="button"
-                    className="size-4 cursor-pointer text-red-700"
-                    onClick={() => itemsArray.remove(i)}
+                <TableCell>
+                  <Controller
+                    control={control}
+                    name={`effects.${i}.attributes.${j}.name`}
+                    rules={{ required: 'Effect attribute name is required' }}
+                    render={({ field }) => (
+                      <TableInput
+                        type="text"
+                        placeholder="Attribute name"
+                        {...field}
+                        error={errors.effects?.[i]?.attributes?.[j]?.name?.message}
+                      />
+                    )}
                   />
                 </TableCell>
-              </TableRow>
-
-              {/* Attribute Header */}
-              {/* <TableRow>
-                <TableCell />
-                <TableCell className="font-bold">Name</TableCell>
-                <TableCell className="font-bold">Value</TableCell>
-                <TableCell className="font-bold">TimeUnit</TableCell>
-                <TableCell />
-              </TableRow> */}
-
-              {/* Attribute Rows */}
-              {field.attributes.map((_, j) => (
-                <TableRow key={`${field.id}-${j}`}>
-                  <TableCell />
-                  <TableCell>
-                    <TableInput
-                      type="text"
-                      placeholder="Attribute name"
-                      {...register(`effects.${i}.attributes.${j}.name` as const)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TableInput
-                      type="number"
-                      placeholder="Value"
-                      {...register(`effects.${i}.attributes.${j}.value` as const, { valueAsNumber: true })}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TableInput
-                      type="text"
-                      placeholder="TimeUnit"
-                      {...register(`effects.${i}.attributes.${j}.timeUnit` as const)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Trash2
-                      tabIndex={0}
-                      role="button"
-                      className="size-4 cursor-pointer text-red-700"
-                      onClick={() =>
-                        itemsArray.update(i, {
-                          ...itemsArray.fields[i],
-                          attributes: [...itemsArray.fields[i].attributes.filter((_, attrIndex) => attrIndex !== j)],
-                        })
-                      }
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-
-              {/* Add new attribute button */}
-              <TableRow>
-                <TableCell className="mx-auto w-fit">
-                  <CornerDownRight className="size-4" />
-                </TableCell>
-                <TableCell colSpan={100}>
-                  <NewTableEntryButton
-                    className="border-b-0"
-                    text="Add new effect attribute"
-                    onClick={() =>
-                      itemsArray.update(i, {
-                        ...itemsArray.fields[i],
-                        attributes: [...itemsArray.fields[i].attributes, { name: '', value: '', timeUnit: '' }],
-                      })
-                    }
+                <TableCell>
+                  <Controller
+                    control={control}
+                    name={`effects.${i}.attributes.${j}.value`}
+                    rules={{ required: 'Effect attribute value is required' }}
+                    render={({ field }) => (
+                      <TableInput
+                        type="textAsNumber"
+                        placeholder="Value"
+                        {...field}
+                        error={errors.effects?.[i]?.attributes?.[j]?.value?.message}
+                      />
+                    )}
                   />
                 </TableCell>
-              </TableRow>
-            </Fragment>
-          );
-        })}
+                <TableCell>
+                  <Controller
+                    control={control}
+                    name={`effects.${i}.attributes.${j}.timeUnit`}
+                    rules={{ required: 'Effect attribute time unit is required' }}
+                    render={({ field }) => (
+                      <TableInput
+                        type="text"
+                        placeholder="Unit"
+                        {...field}
+                        error={errors.effects?.[i]?.attributes?.[j]?.timeUnit?.message}
+                      />
+                    )}
+                  />
+                </TableCell>
+                <TableCell
+                  tabIndex={0}
+                  title={field.attributes.length <= 1 ? 'At least 1 entry required' : ''}
+                  onClick={() => handleRemoveAttribute(i, j)}
+                  onKeyDown={(e) => handleRemoveAttribute(i, j, e)}
+                  className={cn('cursor-pointer border-r-0 text-red-700', {
+                    'cursor-not-allowed text-neutral-600': field.attributes.length <= 1,
+                  })}
+                >
+                  <Trash2 className="size-4" />
+                </TableCell>
+              </Fragment>
+            ))}
 
-        {/* Add new effect button */}
-        <TableRow>
-          <TableCell colSpan={5}>
-            <NewTableEntryButton
-              text="Add new effect"
-              onClick={() =>
-                itemsArray.append({
-                  name: '',
-                  attributes: [],
-                })
-              }
-            />
-          </TableCell>
-        </TableRow>
-      </TableBody>
+            <TableCell>
+              <div className="bg-muted-foreground h-1/2 w-0.5 justify-self-center"></div>
+              <div className="bg-muted-foreground h-0.5 w-1/2 translate-x-6/12 justify-self-center"></div>
+            </TableCell>
+            <TableCell className="col-span-4 border-r-0">
+              <TableAddRow
+                className="col-span-4 border-t-0"
+                text="Add new effect attribute"
+                onClick={() => handleAddAttribute(i)}
+                onKeyDown={(e) => handleAddAttribute(i, e)}
+              />
+            </TableCell>
+          </Fragment>
+        );
+      })}
     </Table>
   );
 };
-
-const NewTableEntryButton = ({
-  onClick,
-  text = 'Add new',
-  className,
-}: {
-  onClick: () => void;
-  text?: string;
-  className?: string;
-}) => (
-  <div
-    className={cn('w-full cursor-pointer border-b p-2', className)}
-    onClick={onClick}
-    role="presentation"
-    tabIndex={0}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onClick();
-      }
-    }}
-  >
-    <div className="text-muted-foreground flex w-full items-center justify-center gap-2">
-      <Plus className="size-4" /> {text}
-    </div>
-  </div>
-);

@@ -1,61 +1,73 @@
-import { type ChangeEvent, type ReactNode, useMemo, useState } from 'react';
-import { CircleCheck, Minus, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import type { ComponentProps } from 'react';
+import { CircleCheck, Minus, Plus } from 'lucide-react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import {
   AttributesTable,
+  CraftOptionsTable,
   Dropzone,
+  EffectsTable,
+  InputWithDropdown,
+  LabelContainer,
   PageTitle,
-  PopoverDropdown,
   RequirementsTable,
-  SearchWithSuggestions,
-  TableInput,
+  StyledAccordion,
+  TableAddRow,
 } from '@/components';
-import { EffectsTable } from '@/components/EditorParts';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { Item } from '@/db';
-import { getItemSuggestionsByName } from '@/db/functions';
-import type { ItemAttribute } from '@/db/types';
-import { useClickOutside } from '@/hooks';
-import { debounce } from '@/lib';
-import { cn } from '@/lib/utils';
+import {
+  entityTypes,
+  itemCategories,
+  itemCategoriesDropdownOptions,
+  itemEntityTypesDropdownOptions,
+  itemRarities,
+  itemRaritiesDropdownOptions,
+  itemTiers,
+  itemTiersDropdownOptions,
+} from '@/constants';
+import { getItemByName } from '@/db/functions';
+import type { ItemForm } from '@/db/types';
 
-const frameworks = [
-  {
-    value: 'Tier I',
-    label: 'Tier I',
-  },
-  {
-    value: 'Tier II',
-    label: 'Tier II',
-  },
-  {
-    value: 'Tier III',
-    label: 'Tier III',
-  },
-  {
-    value: 'Tier IV',
-    label: 'Tier IV',
-  },
-  {
-    value: 'Tier V',
-    label: 'Tier V',
-  },
-];
+const defaultValues: ItemForm = {
+  id: '',
+  icon: '',
+  name: '',
+  tier: '',
+  rarity: '',
+  category: '',
+  entityType: '',
+  effects: [],
+  attributes: [],
+  craftOptions: [],
+  requirements: [],
+};
 
 export const Editor = () => {
-  const [suggestions, setSuggestions] = useState<Item[]>([]);
-  const [isSuggestionListOpen, setSuggestionListOpen] = useState(false);
   const [isNewItem, setIsNewItem] = useState(false);
-  const [tier, setTier] = useState('');
 
-  const { control, register, handleSubmit } = useForm<Item>({
-    defaultValues: {},
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ItemForm>({
+    defaultValues,
+    mode: 'onChange',
   });
 
   const requirementsArray = useFieldArray({ control, name: 'requirements' });
@@ -63,41 +75,29 @@ export const Editor = () => {
   const effectsArray = useFieldArray({ control, name: 'effects' });
   const craftOptionsArray = useFieldArray({ control, name: 'craftOptions' });
 
-  const debouncedItemLookup = useMemo(
-    () =>
-      debounce((itemName: string) => {
-        if (!itemName.trim()) {
-          setSuggestionListOpen(false);
-          return;
-        }
-
-        const results = getItemSuggestionsByName(itemName);
-        setSuggestions(results);
-        setSuggestionListOpen(true);
-      }, 300),
-    [],
-  );
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    debouncedItemLookup(e.target.value);
+  const handleFormSubmit = (data: ItemForm) => {
+    // if (!data.id) return;
+    console.log(data);
   };
 
-  const handleSelect = (item: Item) => {
-    console.log(item);
-    handleClear();
+  const handleResetForm = () => {
+    reset(defaultValues);
   };
 
-  const handleClear = () => {
-    debouncedItemLookup('');
-    setSuggestionListOpen(false);
+  const handleAddNewAttribute = () => attributesArray.append({ name: '', valueMin: '' });
+  const handleAdNewRequirement = () => requirementsArray.append({ level: '' });
+  const handleAddNewEffect = () =>
+    effectsArray.append({ name: '', attributes: [{ name: '', timeUnit: '', value: '' }] });
+  const handleAddNewCraftingOption = () => {
+    craftOptionsArray.append({
+      level: '',
+      profession: '',
+      building: { name: '', tier: '' },
+      tool: { name: '', tier: '' },
+      input: [{ id: '', quantity: '' }],
+      output: [{ id: '', quantity: '' }],
+    });
   };
-
-  const handleAddNew = () => {
-    setIsNewItem(true);
-    setSuggestionListOpen(false);
-  };
-
-  const commandRef = useClickOutside<HTMLDivElement>(() => setSuggestionListOpen(false));
 
   return (
     <>
@@ -105,35 +105,46 @@ export const Editor = () => {
 
       <form
         className="flex w-full flex-col items-start justify-start gap-6"
-        onSubmit={handleSubmit((values) => {
-          console.log(values);
+        onSubmit={handleSubmit(handleFormSubmit, (errors) => {
+          console.log('Validation errors:', errors);
         })}
       >
         <div className="flex w-full items-end gap-2">
-          <div className="">
+          <div className="flex flex-col gap-2">
             <Label>Search item</Label>
-            <SearchWithSuggestions
-              isOpen={isSuggestionListOpen}
-              onChange={handleChange}
-              onFocus={handleChange}
-              onClickOutside={handleClear}
-              onSelect={handleSelect}
-              placeholder="search item to modify..."
-              suggestions={suggestions}
-              withIcon
-              onClear={handleClear}
-              handleAddNew={handleAddNew}
-              ref={commandRef}
-            />
+            {/* There has to be input but without setting item as a button */}
           </div>
-          <Button onClick={() => setIsNewItem(true)}>
+
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setIsNewItem(true);
+            }}
+          >
             <Plus />
             Add new
           </Button>
-          <Button variant="destructive">
-            <Minus />
-            Reset
-          </Button>
+
+          {/* Reset button with confirmation */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={!isNewItem}>
+                <Minus />
+                Reset
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Do you want to reset?</AlertDialogTitle>
+                <AlertDialogDescription>This will erase all the data from all inputs.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetForm}>Continue</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           {isNewItem && (
             <Button variant="confirm" type="submit" className="ml-auto justify-self-end">
               <CircleCheck />
@@ -141,12 +152,15 @@ export const Editor = () => {
             </Button>
           )}
         </div>
-        {isNewItem && (
-          <Card className="w-full">
-            <CardContent>
-              <div className="flex h-full w-full gap-12">
+        <Card className="w-full">
+          <CardContent>
+            {!isNewItem && (
+              <div className="p-10">Edit existing item or create a new one by clicking "Add New" button</div>
+            )}
+            {isNewItem && (
+              <div className="flex h-full w-full flex-wrap gap-12">
                 <Column>
-                  <InputContainer name="Image">
+                  <LabelContainer name="Image">
                     <Controller
                       control={control}
                       name="icon"
@@ -154,103 +168,162 @@ export const Editor = () => {
                         <Dropzone className="aspect-square w-54 max-w-54" onImageChange={field.onChange} />
                       )}
                     />
-                  </InputContainer>
+                  </LabelContainer>
 
-                  <InputContainer name="ID">
-                    <Input type="text" {...register('id')} />
-                  </InputContainer>
-                  <InputContainer name="Name">
-                    <Input type="text" {...register('name')} />
-                  </InputContainer>
-                  <InputContainer name="Tier">
-                    <PopoverDropdown list={frameworks} placeholder="Select Tier..." setValue={setTier} value={tier} />
-                  </InputContainer>
-                  <InputContainer name="Rarity">
-                    <PopoverDropdown list={frameworks} placeholder="Select Rarity..." setValue={setTier} value={tier} />
-                  </InputContainer>
-                  <InputContainer name="Category">
-                    <PopoverDropdown
-                      list={frameworks}
-                      placeholder="Select Category..."
-                      setValue={setTier}
-                      value={tier}
+                  <LabelContainer name="Name *">
+                    <Controller
+                      control={control}
+                      name="name"
+                      rules={{
+                        required: 'Name is required',
+                        validate: (value) => {
+                          const existingItem = getItemByName(value);
+                          return existingItem === null || `Item "${value}" already exists with ID: ${existingItem.id}`;
+                        },
+                      }}
+                      render={({ field }) => (
+                        <Input
+                          type="text"
+                          placeholder="Name"
+                          autoComplete="off"
+                          variant={errors.name ? 'error' : 'default'}
+                          {...field}
+                        />
+                      )}
                     />
-                  </InputContainer>
-                  <InputContainer name="Entity type">
-                    <PopoverDropdown
-                      list={frameworks}
-                      placeholder="Select Entity Type..."
-                      setValue={setTier}
-                      value={tier}
+                    {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
+                  </LabelContainer>
+
+                  <LabelContainer name="Tier *">
+                    <Controller
+                      control={control}
+                      name="tier"
+                      rules={{
+                        required: 'Tier is required',
+                        validate: (value) => value && itemTiers.includes(value),
+                      }}
+                      render={({ field: { value, onChange } }) => (
+                        <InputWithDropdown
+                          list={itemTiersDropdownOptions}
+                          placeholder="Select Tier..."
+                          value={value}
+                          onChange={onChange}
+                          hasError={!!errors.tier}
+                        />
+                      )}
                     />
-                  </InputContainer>
+                    {errors.tier && <span className="text-destructive text-xs">{errors.tier.message}</span>}
+                  </LabelContainer>
+
+                  <LabelContainer name="Rarity *">
+                    <Controller
+                      control={control}
+                      name="rarity"
+                      rules={{
+                        required: 'Rarity is required',
+                        validate: (value) => value && itemRarities.includes(value),
+                      }}
+                      render={({ field }) => (
+                        <InputWithDropdown
+                          list={itemRaritiesDropdownOptions}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select Rarity..."
+                          hasError={!!errors.rarity}
+                        />
+                      )}
+                    />
+                    {errors.rarity && <span className="text-destructive text-xs">{errors.rarity.message}</span>}
+                  </LabelContainer>
+
+                  <LabelContainer name="Category *">
+                    <Controller
+                      control={control}
+                      name="category"
+                      rules={{
+                        required: 'Category is required',
+                        validate: (value) => value && itemCategories.includes(value),
+                      }}
+                      render={({ field }) => (
+                        <InputWithDropdown
+                          list={itemCategoriesDropdownOptions}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select Category..."
+                          hasError={!!errors.category}
+                        />
+                      )}
+                    />
+                    {errors.category && <span className="text-destructive text-xs">{errors.category.message}</span>}
+                  </LabelContainer>
+
+                  <LabelContainer name="Entity Type *">
+                    <Controller
+                      control={control}
+                      name="entityType"
+                      rules={{
+                        required: 'Entity Type is required',
+                        validate: (value) => value && entityTypes.includes(value),
+                      }}
+                      render={({ field }) => (
+                        <InputWithDropdown
+                          list={itemEntityTypesDropdownOptions}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select Entity type..."
+                          hasError={!!errors.entityType}
+                        />
+                      )}
+                    />
+                    {errors.entityType && <span className="text-destructive text-xs">{errors.entityType.message}</span>}
+                  </LabelContainer>
                 </Column>
                 <Column>
-                  <StyledAccordion name="Attributes">
-                    <NewTableEntryButton onClick={() => attributesArray.append({ name: '', valueMin: '' })} />
-                    <AttributesTable itemsArray={attributesArray} control={control} register={register} />
+                  <StyledAccordion name="Attributes" defaultOpen={true}>
+                    <AttributesTable itemsArray={attributesArray} control={control} errors={errors} />
+                    <TableAddRow onClick={handleAddNewAttribute} onKeyDown={handleAddNewAttribute} />
                   </StyledAccordion>
 
-                  <StyledAccordion name="Requirements">
-                    <NewTableEntryButton onClick={() => requirementsArray.append({ level: '' })} />
-                    <RequirementsTable control={control} itemsArray={requirementsArray} register={register} />
+                  <StyledAccordion name="Requirements" defaultOpen={true}>
+                    <RequirementsTable itemsArray={requirementsArray} control={control} errors={errors} />
+                    <TableAddRow onClick={handleAdNewRequirement} onKeyDown={handleAdNewRequirement} />
                   </StyledAccordion>
 
-                  <StyledAccordion name="Effects">
-                    <NewTableEntryButton onClick={() => effectsArray.append({ name: '', attributes: [] })} />
-                    <EffectsTable control={control} itemsArray={effectsArray} register={register} />
+                  <StyledAccordion name="Effects" defaultOpen={true}>
+                    <EffectsTable itemsArray={effectsArray} control={control} errors={errors} />
+                    <TableAddRow onClick={handleAddNewEffect} onKeyDown={handleAddNewEffect} />
                   </StyledAccordion>
                 </Column>
+                <Column>
+                  <div className="flex w-max items-center gap-4">
+                    <LabelContainer name="Crafting Options" className="whitespace-nowrap" />
+                    <div className="flex w-full items-center justify-start gap-8">
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleAddNewCraftingOption();
+                        }}
+                      >
+                        <Plus />
+                        Add new
+                      </Button>
+                    </div>
+                  </div>
+                  <CraftOptionsTable
+                    control={control}
+                    itemsArray={craftOptionsArray}
+                    errors={errors}
+                    register={register}
+                  />
+                </Column>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
       </form>
     </>
   );
 };
 
-const Column = ({ children }: { children: ReactNode }) => <div className="flex flex-col gap-4">{children}</div>;
-
-const InputContainer = ({ children, name }: { children: ReactNode; name: string }) => (
-  <Label className="flex w-full flex-col items-start gap-2 capitalize">
-    {name}:{children}
-  </Label>
-);
-
-const StyledAccordion = ({ name, children, className }: { name: string; children: ReactNode; className?: string }) => (
-  <Accordion type="single" collapsible>
-    <AccordionItem value={name}>
-      <AccordionTrigger className="hover:bg-background [&[data-state=open]]:bg-background [&[data-state=closed]]:border-b-border hover:border-border flex min-w-[300px] cursor-pointer items-center rounded-b-none border border-transparent capitalize hover:no-underline">
-        {name}
-      </AccordionTrigger>
-      <AccordionContent
-        className={cn(
-          'border-border flex max-h-[200px] flex-col overflow-hidden rounded-b-md border select-none',
-          className,
-        )}
-      >
-        {children}
-      </AccordionContent>
-    </AccordionItem>
-  </Accordion>
-);
-
-const NewTableEntryButton = ({ onClick }: { onClick: () => void }) => (
-  <div
-    className="w-full cursor-pointer border-b p-2"
-    onClick={onClick}
-    role="presentation"
-    tabIndex={0}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onClick();
-      }
-    }}
-  >
-    <div className="text-muted-foreground flex w-full items-center justify-center gap-2">
-      <Plus className="size-4" /> Add new
-    </div>
-  </div>
-);
+const Column = ({ children }: ComponentProps<'div'>) => <div className="flex flex-col gap-4">{children}</div>;
