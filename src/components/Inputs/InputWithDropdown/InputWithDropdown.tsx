@@ -117,6 +117,12 @@ export const InputWithDropdown = ({
       case 'Tab':
         e.preventDefault();
         break;
+      case 'Delete': {
+        if (!value) return;
+
+        onChange?.('');
+        break;
+      }
       default:
         break;
     }
@@ -161,15 +167,13 @@ export const InputWithDropdown = ({
 
   // Unmount after transition
   useEffect(() => {
+    if (open && show) {
+      searchInputRef.current?.focus();
+    }
+
     if (!open && show) {
       const timeout = setTimeout(() => setShow(false), 150);
       return () => clearTimeout(timeout);
-    }
-  }, [open, show]);
-
-  useEffect(() => {
-    if (open && show) {
-      searchInputRef.current?.focus();
     }
   }, [open, show]);
 
@@ -177,21 +181,19 @@ export const InputWithDropdown = ({
   useEffect(() => {
     if (!show) return;
 
-    const handle = () => updateDropdownPosition();
-
-    window.addEventListener('scroll', handle, true);
-    window.addEventListener('resize', handle);
+    window.addEventListener('scroll', updateDropdownPosition, true);
+    window.addEventListener('resize', updateDropdownPosition);
 
     let observer: ResizeObserver | undefined;
     if (triggerRef.current) {
-      observer = new window.ResizeObserver(handle);
+      observer = new window.ResizeObserver(updateDropdownPosition);
       observer.observe(triggerRef.current);
     }
 
-    handle();
+    updateDropdownPosition();
     return () => {
-      window.removeEventListener('scroll', handle, true);
-      window.removeEventListener('resize', handle);
+      window.removeEventListener('scroll', updateDropdownPosition, true);
+      window.removeEventListener('resize', updateDropdownPosition);
       observer?.disconnect();
     };
   }, [show]);
@@ -239,7 +241,12 @@ export const InputWithDropdown = ({
           />
         </div>
         <Separator />
-        <div tabIndex={-1} className="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto p-1 py-2">
+        <div
+          tabIndex={-1}
+          className="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto p-1 py-2"
+          role="combobox"
+          id="dropdown-listbox"
+        >
           {filtered.length === 0 && <div className="text-muted-foreground px-3 py-2 select-none">No option found.</div>}
           {filtered.map((item, i) => (
             <div
@@ -250,6 +257,9 @@ export const InputWithDropdown = ({
               role="option"
               title={item.label}
               aria-selected={value === item.value}
+              id={`option-${item.value}`}
+              aria-posinset={i + 1}
+              aria-setsize={filtered.length}
               onMouseDown={() => handleSelect(item.value)}
               onMouseEnter={() => setHighlighted(i)}
               className={cn(
@@ -285,6 +295,9 @@ export const InputWithDropdown = ({
           disabled && 'text-muted-foreground cursor-not-allowed opacity-50 hover:bg-transparent',
           triggerClassName,
         )}
+        role="combobox"
+        aria-controls="dropdown-listbox"
+        aria-activedescendant={show && filtered[highlighted] ? `option-${filtered[highlighted].value}` : undefined}
         title={selectedLabel}
         onClick={() => {
           if (disabled) return;

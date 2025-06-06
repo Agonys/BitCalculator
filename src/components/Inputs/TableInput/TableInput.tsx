@@ -28,7 +28,6 @@ export const TableInput = ({ className, type, error, ...props }: TableInputProps
 
   return (
     <input
-      // type="text"
       placeholder={props.placeholder}
       {...props}
       {...typeSpecificProps}

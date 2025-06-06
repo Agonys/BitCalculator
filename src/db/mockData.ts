@@ -4,7 +4,7 @@ export const mockData: Item[] = [
   {
     id: 'training-shortsword',
     icon: 'https://i.imgur.com/QY6zecI.png',
-    name: 'training shortsword with very long name that exceeds 3 lines of text',
+    name: 'training shortsword',
     entityType: 'item',
     tier: '1',
     rarity: 'common',

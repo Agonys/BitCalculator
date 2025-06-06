@@ -150,7 +150,7 @@ export const SearchableItemTile = ({
   ]);
 
   return (
-    <Popover open={isOpen} modal={true}>
+    <Popover open={isOpen} modal>
       <PopoverTrigger asChild className="h-fit">
         <div
           onClick={(e) => {

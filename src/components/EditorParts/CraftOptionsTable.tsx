@@ -120,7 +120,7 @@ export const CraftOptionsTable = ({ itemsArray, control, errors, register }: Cra
                   }}
                   render={({ field }) => (
                     <Input
-                      type="text"
+                      type="textAsNumber"
                       placeholder="Level"
                       className="w-[80px]"
                       {...field}

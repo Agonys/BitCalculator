@@ -15,7 +15,7 @@ export type ItemTiers = (typeof itemTiers)[number];
 export type ItemCategories = (typeof itemCategories)[number];
 export type ItemRarities = (typeof itemRarities)[number];
 export type CraftingProfessions = (typeof craftingProfessions)[number];
-export type CrafingBuildings = (typeof craftingStations)[number];
+export type CraftingBuildings = (typeof craftingStations)[number];
 export type CraftingTools = (typeof craftingTools)[number];
 export type EffectsList = (typeof itemEffects)[number];
 export type TimeUnits = (typeof itemEffectTimeUnits)[number];
@@ -47,7 +47,7 @@ export interface ItemCraftOption {
   level: number;
   profession: CraftingProfessions;
   building?: {
-    name: CrafingBuildings;
+    name: CraftingBuildings;
     tier: ItemTiers;
   };
   tool?: {

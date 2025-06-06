@@ -92,14 +92,8 @@ export const Editor = () => {
     craftOptionsArray.append({
       level: '',
       profession: '',
-      building: {
-        name: '',
-        tier: '',
-      },
-      tool: {
-        name: '',
-        tier: '',
-      },
+      building: { name: '', tier: '' },
+      tool: { name: '', tier: '' },
       input: [{ id: '', quantity: '' }],
       output: [{ id: '', quantity: '' }],
     });
@@ -182,7 +176,10 @@ export const Editor = () => {
                       name="name"
                       rules={{
                         required: 'Name is required',
-                        validate: (value) => getItemByName(value) === null || 'This item already exists',
+                        validate: (value) => {
+                          const existingItem = getItemByName(value);
+                          return existingItem === null || `Item "${value}" already exists with ID: ${existingItem.id}`;
+                        },
                       }}
                       render={({ field }) => (
                         <Input

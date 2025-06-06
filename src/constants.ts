@@ -1,7 +1,17 @@
+import type { ItemRarities } from './db/types';
 import { createDropdownOptionsFromList } from './lib';
 
 export const itemTiers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
 export const itemRarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'] as const;
+
+export const rarityColors = {
+  common: '#867557',
+  uncommon: '#62c157',
+  rare: '#4a90e2',
+  epic: '#9b59b6',
+  legendary: '#f39c12',
+} satisfies Record<ItemRarities, string>;
+
 export const itemCategories = [
   'weapon',
   'cosmetic clothes',

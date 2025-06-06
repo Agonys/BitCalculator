@@ -1,7 +1,6 @@
 export const capitalize = (str?: string) => {
-  if (!str?.trim()) return null;
+  const cleanString = str?.trim();
 
-  const cleanString = str.trim();
-
+  if (!cleanString) return null;
   return cleanString.charAt(0).toUpperCase() + cleanString.slice(1).toLowerCase();
 };
