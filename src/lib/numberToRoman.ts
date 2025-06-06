@@ -1,8 +1,11 @@
-export const numberToRoman = (num?: number): string | null => {
-  if (!num) return null;
+export const numberToRoman = (input?: string | number): string | null => {
+  const num = Number(input);
 
-  if (num < 1 || num > 3999) return num.toString();
-  const roman: [number, string][] = [
+  if (input === undefined || input === null || isNaN(num) || String(input).trim() === '' || num < 1) {
+    return null;
+  }
+
+  const map: [number, string][] = [
     [1000, 'M'],
     [900, 'CM'],
     [500, 'D'],
@@ -17,12 +20,17 @@ export const numberToRoman = (num?: number): string | null => {
     [4, 'IV'],
     [1, 'I'],
   ];
+
+  let remainder = num;
   let result = '';
-  for (const [value, numeral] of roman) {
-    while (num >= value) {
-      result += numeral;
-      num -= value;
+
+  for (const [value, numeral] of map) {
+    const count = Math.floor(remainder / value);
+    if (count > 0) {
+      result += numeral.repeat(count);
+      remainder -= value * count;
     }
   }
+
   return result;
 };

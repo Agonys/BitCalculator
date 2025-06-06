@@ -1,16 +1,22 @@
 import { Fragment, type KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
-import type { Control, UseFieldArrayReturn, UseFormRegister } from 'react-hook-form';
+import {
+  type Control,
+  Controller,
+  type FieldErrors,
+  type UseFieldArrayReturn,
+  type UseFormRegister,
+} from 'react-hook-form';
 import { TableInput } from '@/components/Inputs';
 import type { ItemForm } from '@/db';
 import { Table, TableCell } from './CustomTable';
 
 interface RequirementsTableProps {
   itemsArray: UseFieldArrayReturn<ItemForm, 'requirements', 'id'>;
-  register: UseFormRegister<ItemForm>;
   control: Control<ItemForm>;
+  errors: FieldErrors<ItemForm>;
 }
-export const RequirementsTable = ({ itemsArray, register }: RequirementsTableProps) => {
+export const RequirementsTable = ({ itemsArray, control, errors }: RequirementsTableProps) => {
   const handleKeyboardDelete = (e: KeyboardEvent<HTMLDivElement>, i: number) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -28,10 +34,36 @@ export const RequirementsTable = ({ itemsArray, register }: RequirementsTablePro
       {itemsArray.fields.map((field, i) => (
         <Fragment key={field.id}>
           <TableCell>
-            <TableInput type="text" placeholder="Skill" {...register(`requirements.${i}.skill` as const)} />
+            <Controller
+              control={control}
+              name={`requirements.${i}.skill`}
+              render={({ field }) => (
+                <TableInput
+                  type="text"
+                  placeholder="Skill"
+                  {...field}
+                  error={errors.requirements?.[i]?.skill?.message}
+                />
+              )}
+            />
           </TableCell>
           <TableCell>
-            <TableInput type="textAsNumber" placeholder="level" {...register(`requirements.${i}.level` as const)} />
+            <Controller
+              control={control}
+              name={`requirements.${i}.level`}
+              rules={{
+                required:
+                  'Level of requirement is required. Name could be empty (level requirement applied to anything)',
+              }}
+              render={({ field }) => (
+                <TableInput
+                  type="textAsNumber"
+                  placeholder="Level"
+                  {...field}
+                  error={errors.requirements?.[i]?.level?.message}
+                />
+              )}
+            />
           </TableCell>
           <TableCell onClick={() => itemsArray.remove(i)} onKeyDown={(e) => handleKeyboardDelete(e, i)}>
             <Trash2 className="size-4 cursor-pointer text-red-700" />

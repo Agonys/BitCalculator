@@ -9,10 +9,7 @@ export function useClickOutside<T extends HTMLElement>(
   useEffect(() => {
     function handleClick(event: MouseEvent) {
       if (ref.current && ref.current.contains(event.target as Node)) return;
-      if (
-        extraRefs &&
-        extraRefs.some((extraRef) => extraRef.current && extraRef.current.contains(event.target as Node))
-      ) {
+      if (extraRefs?.some((extraRef) => extraRef.current?.contains(event.target as Node))) {
         return;
       }
       handler();

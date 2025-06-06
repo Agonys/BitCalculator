@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import type { ComponentProps } from 'react';
-import { CircleCheck, Minus, Plus } from 'lucide-react';
+import { ChevronDownIcon, CircleCheck, Minus, Plus } from 'lucide-react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import {
   AttributesTable,
@@ -27,24 +27,47 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  entityTypes,
+  itemCategories,
   itemCategoriesDropdownOptions,
   itemEntityTypesDropdownOptions,
+  itemRarities,
   itemRaritiesDropdownOptions,
+  itemTiers,
   itemTiersDropdownOptions,
 } from '@/constants';
-import type { ItemForm, TimeUnits } from '@/db';
-import type { CheckedState } from '@radix-ui/react-checkbox';
+import { getItemByName } from '@/db/functions';
+import type { ItemForm } from '@/db/types';
+
+const defaultValues: ItemForm = {
+  id: '',
+  icon: '',
+  name: '',
+  tier: '',
+  rarity: '',
+  category: '',
+  entityType: '',
+  effects: [],
+  attributes: [],
+  craftOptions: [],
+  requirements: [],
+};
 
 export const Editor = () => {
   const [isNewItem, setIsNewItem] = useState(false);
-  const [doDefineID, setDoDefineID] = useState<CheckedState>(false);
 
-  const { control, register, handleSubmit, setValue, reset } = useForm<ItemForm>({
-    defaultValues: {},
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ItemForm>({
+    defaultValues,
+    mode: 'onChange',
   });
 
   const requirementsArray = useFieldArray({ control, name: 'requirements' });
@@ -57,41 +80,53 @@ export const Editor = () => {
     console.log(data);
   };
 
-  const handleAddNewAttribute = () => attributesArray.append({ name: '', valueMin: '' as unknown as number });
-  const handleAdNewRequirement = () => requirementsArray.append({ level: '' as unknown as number });
+  const handleResetForm = () => {
+    reset(defaultValues);
+  };
+
+  const handleAddNewAttribute = () => attributesArray.append({ name: '', valueMin: '' });
+  const handleAdNewRequirement = () => requirementsArray.append({ level: '' });
   const handleAddNewEffect = () =>
-    effectsArray.append({ name: '', attributes: [{ name: '', timeUnit: '' as unknown as TimeUnits, value: '' }] });
+    effectsArray.append({ name: '', attributes: [{ name: '', timeUnit: '', value: '' }] });
   const handleAddNewCraftingOption = () => {
     craftOptionsArray.append({
-      level: '' as unknown as number,
+      level: '',
       profession: '',
       building: {
         name: '',
-        tier: '' as unknown as 1,
+        tier: '',
       },
       tool: {
         name: '',
-        tier: '' as unknown as 1,
+        tier: '',
       },
-      input: [{ id: '', quantity: '' as unknown as 1 }],
-      output: [{ id: '', quantity: '' as unknown as 1 }],
+      input: [{ id: '', quantity: '' }],
+      output: [{ id: '', quantity: '' }],
     });
   };
-
-  // Add mapping of consts to lists and also when resteing the form it's easier to swap it with empty object so that useFieldArrays should also update causing unwanted entries to disapear;
 
   return (
     <>
       <PageTitle text="Recipe editor tool" description="Add or modify recipes with all possible details" />
 
-      <form className="flex-col-gap-6 w-full items-start justify-start" onSubmit={handleSubmit(handleFormSubmit)}>
+      <form
+        className="flex w-full flex-col items-start justify-start gap-6"
+        onSubmit={handleSubmit(handleFormSubmit, (errors) => {
+          console.log('Validation errors:', errors);
+        })}
+      >
         <div className="flex w-full items-end gap-2">
-          <div className="flex-col-gap-2">
+          <div className="flex flex-col gap-2">
             <Label>Search item</Label>
             {/* There has to be input but without setting item as a button */}
           </div>
 
-          <Button onClick={() => setIsNewItem(true)}>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setIsNewItem(true);
+            }}
+          >
             <Plus />
             Add new
           </Button>
@@ -99,7 +134,7 @@ export const Editor = () => {
           {/* Reset button with confirmation */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">
+              <Button variant="destructive" disabled={!isNewItem}>
                 <Minus />
                 Reset
               </Button>
@@ -111,13 +146,7 @@ export const Editor = () => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    reset();
-                  }}
-                >
-                  Continue
-                </AlertDialogAction>
+                <AlertDialogAction onClick={handleResetForm}>Continue</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -147,99 +176,138 @@ export const Editor = () => {
                     />
                   </LabelContainer>
 
-                  <label className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1">
-                      <Checkbox onCheckedChange={(e) => setDoDefineID(e)} /> Define ID{' '}
-                    </div>
-                    <span className="text-muted-foreground text-xs">(if not, transformed name will be used as ID)</span>
-                  </label>
-                  {doDefineID && (
-                    <LabelContainer name="ID">
-                      <Input type="text" {...register('id')} placeholder="ID" />
-                    </LabelContainer>
-                  )}
-
-                  <LabelContainer name="Name">
-                    <Input type="text" {...register('name')} placeholder="Name" />
+                  <LabelContainer name="Name *">
+                    <Controller
+                      control={control}
+                      name="name"
+                      rules={{
+                        required: 'Name is required',
+                        validate: (value) => getItemByName(value) === null || 'This item already exists',
+                      }}
+                      render={({ field }) => (
+                        <Input
+                          type="text"
+                          placeholder="Name"
+                          autoComplete="off"
+                          variant={errors.name ? 'error' : 'default'}
+                          {...field}
+                        />
+                      )}
+                    />
+                    {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
                   </LabelContainer>
-                  <LabelContainer name="Tier">
+
+                  <LabelContainer name="Tier *">
                     <Controller
                       control={control}
                       name="tier"
+                      rules={{
+                        required: 'Tier is required',
+                        validate: (value) => value && itemTiers.includes(value),
+                      }}
                       render={({ field: { value, onChange } }) => (
                         <InputWithDropdown
                           list={itemTiersDropdownOptions}
                           placeholder="Select Tier..."
                           value={value}
                           onChange={onChange}
+                          hasError={!!errors.tier}
                         />
                       )}
                     />
+                    {errors.tier && <span className="text-destructive text-xs">{errors.tier.message}</span>}
                   </LabelContainer>
-                  <LabelContainer name="Rarity">
+
+                  <LabelContainer name="Rarity *">
                     <Controller
                       control={control}
                       name="rarity"
+                      rules={{
+                        required: 'Rarity is required',
+                        validate: (value) => value && itemRarities.includes(value),
+                      }}
                       render={({ field }) => (
                         <InputWithDropdown
                           list={itemRaritiesDropdownOptions}
                           value={field.value}
                           onChange={field.onChange}
                           placeholder="Select Rarity..."
+                          hasError={!!errors.rarity}
                         />
                       )}
                     />
+                    {errors.rarity && <span className="text-destructive text-xs">{errors.rarity.message}</span>}
                   </LabelContainer>
-                  <LabelContainer name="Category">
+
+                  <LabelContainer name="Category *">
                     <Controller
                       control={control}
                       name="category"
+                      rules={{
+                        required: 'Category is required',
+                        validate: (value) => value && itemCategories.includes(value),
+                      }}
                       render={({ field }) => (
                         <InputWithDropdown
                           list={itemCategoriesDropdownOptions}
                           value={field.value}
                           onChange={field.onChange}
                           placeholder="Select Category..."
+                          hasError={!!errors.category}
                         />
                       )}
                     />
+                    {errors.category && <span className="text-destructive text-xs">{errors.category.message}</span>}
                   </LabelContainer>
-                  <LabelContainer name="Entity Type">
+
+                  <LabelContainer name="Entity Type *">
                     <Controller
                       control={control}
                       name="entityType"
+                      rules={{
+                        required: 'Entity Type is required',
+                        validate: (value) => value && entityTypes.includes(value),
+                      }}
                       render={({ field }) => (
                         <InputWithDropdown
                           list={itemEntityTypesDropdownOptions}
                           value={field.value}
                           onChange={field.onChange}
                           placeholder="Select Entity type..."
+                          hasError={!!errors.entityType}
                         />
                       )}
                     />
+                    {errors.entityType && <span className="text-destructive text-xs">{errors.entityType.message}</span>}
                   </LabelContainer>
                 </Column>
                 <Column>
-                  <StyledAccordion name="Attributes" defaultValue="Attributes">
-                    <AttributesTable itemsArray={attributesArray} control={control} register={register} />
+                  <StyledAccordion name="Attributes" defaultOpen={true}>
+                    <AttributesTable itemsArray={attributesArray} control={control} errors={errors} />
                     <TableAddRow onClick={handleAddNewAttribute} onKeyDown={handleAddNewAttribute} />
                   </StyledAccordion>
 
-                  <StyledAccordion name="Requirements" defaultValue="Requirements">
-                    <RequirementsTable control={control} itemsArray={requirementsArray} register={register} />
+                  <StyledAccordion name="Requirements" defaultOpen={true}>
+                    <RequirementsTable itemsArray={requirementsArray} control={control} errors={errors} />
                     <TableAddRow onClick={handleAdNewRequirement} onKeyDown={handleAdNewRequirement} />
                   </StyledAccordion>
 
-                  <StyledAccordion name="Effects" defaultValue="Effects">
-                    <EffectsTable control={control} itemsArray={effectsArray} register={register} />
+                  <StyledAccordion name="Effects" defaultOpen={true}>
+                    <EffectsTable itemsArray={effectsArray} control={control} errors={errors} />
                     <TableAddRow onClick={handleAddNewEffect} onKeyDown={handleAddNewEffect} />
                   </StyledAccordion>
                 </Column>
                 <Column>
                   <div className="flex w-max items-center gap-4">
                     <LabelContainer name="Crafting Options" className="whitespace-nowrap" />
-                    <div className="flex-gap-2 w-full items-center justify-start gap-8">
-                      <Button variant="outline" onClick={handleAddNewCraftingOption}>
+                    <div className="flex w-full items-center justify-start gap-8">
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleAddNewCraftingOption();
+                        }}
+                      >
                         <Plus />
                         Add new
                       </Button>
@@ -248,8 +316,8 @@ export const Editor = () => {
                   <CraftOptionsTable
                     control={control}
                     itemsArray={craftOptionsArray}
+                    errors={errors}
                     register={register}
-                    setValue={setValue}
                   />
                 </Column>
               </div>
@@ -261,4 +329,4 @@ export const Editor = () => {
   );
 };
 
-const Column = ({ children }: ComponentProps<'div'>) => <div className="flex-col-gap-4">{children}</div>;
+const Column = ({ children }: ComponentProps<'div'>) => <div className="flex flex-col gap-4">{children}</div>;

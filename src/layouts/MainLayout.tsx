@@ -13,7 +13,7 @@ export const MainLayout = () => {
           <Outlet />
         </div>
       </div>
-      <CraftListSummary />
+      {/* <CraftListSummary /> */}
     </SidebarProvider>
   );
 };

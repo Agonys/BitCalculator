@@ -1,13 +1,8 @@
-import { Fragment, type KeyboardEvent, useState } from 'react';
+import { Fragment, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
-import {
-  type Control,
-  Controller,
-  type Path,
-  type UseFieldArrayReturn,
-  type UseFormRegister,
-  type UseFormSetValue,
-} from 'react-hook-form';
+import type { Control, FieldErrors, UseFieldArrayReturn, UseFormRegister } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import {
   InputWithDropdown,
   LabelContainer,
@@ -31,32 +26,23 @@ import { cn, isSubmitKey } from '@/lib';
 
 interface CraftOptionsTableProps {
   itemsArray: UseFieldArrayReturn<ItemForm, 'craftOptions', 'id'>;
-  register: UseFormRegister<ItemForm>;
   control: Control<ItemForm>;
-  setValue: UseFormSetValue<ItemForm>;
+  register: UseFormRegister<ItemForm>;
+  errors: FieldErrors<ItemForm>;
 }
-// LEVEL | PROFESSION | TOOL | BUILDING
-export const CraftOptionsTable = ({ itemsArray, control, register, setValue }: CraftOptionsTableProps) => {
-  const [suggestions, setSuggestions] = useState<Item[]>([]);
+export const CraftOptionsTable = ({ itemsArray, control, errors, register }: CraftOptionsTableProps) => {
+  const [suggestions, setSuggestions] = useState<Item[] | null>([]);
+
+  const handleClearSuggestions = () => setSuggestions(null);
 
   const handleItemTileSuggestions = (itemName: string) => {
     if (!itemName.trim()) {
-      setSuggestions([]);
+      handleClearSuggestions();
       return;
     }
 
     const results = getItemSuggestionsByName(itemName);
     setSuggestions(results);
-  };
-
-  const handleSelectItem = (field: Path<Item>, item: Item) => {
-    setValue(field, item.id);
-    setSuggestions([]);
-  };
-
-  const removeSelectedDependencyItem = (field: Path<Item>) => {
-    setValue(field, '');
-    itemsArray.swap(0, 0);
   };
 
   const removeCraftingOption = (optionIndex: number, e?: KeyboardEvent<HTMLDivElement>) => {
@@ -102,95 +88,108 @@ export const CraftOptionsTable = ({ itemsArray, control, register, setValue }: C
   return (
     <>
       {itemsArray.fields.map((field, i) => (
-        <StyledAccordion
-          key={field.id}
-          name={`Option ${i + 1}`}
-          defaultValue={`Option ${i + 1}`}
-          className="flex-col-gap-2 p-4"
-        >
-          <div className="flex-gap-6 items-end">
-            <LabelContainer name="Level">
-              <Input
-                type="text"
-                placeholder="Level"
-                {...register(`craftOptions.${i}.level` as const)}
-                className="w-[80px]"
-              />
-            </LabelContainer>
-            <LabelContainer name="profession">
-              <Controller
-                control={control}
-                name={`craftOptions.${i}.profession`}
-                render={({ field }) => (
-                  <InputWithDropdown
-                    list={itemCraftingProfessionsDropdownOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Select Profession..."
-                    triggerClassName="min-w-[150px]"
-                  />
-                )}
-              />
-            </LabelContainer>
-            <LabelContainer name="Tool Name">
-              <Controller
-                control={control}
-                name={`craftOptions.${i}.tool.name`}
-                render={({ field }) => (
-                  <InputWithDropdown
-                    list={itemCraftingToolsDropdownOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Select Tool..."
-                  />
-                )}
-              />
-            </LabelContainer>
-            <LabelContainer name="Tool Tier">
-              <Controller
-                control={control}
-                name={`craftOptions.${i}.tool.tier`}
-                render={({ field }) => (
-                  <InputWithDropdown
-                    list={itemTiersDropdownOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Select tier..."
-                  />
-                )}
-              />
-            </LabelContainer>
-            <LabelContainer name="Building Name">
-              <Controller
-                control={control}
-                name={`craftOptions.${i}.building.name`}
-                render={({ field }) => (
-                  <InputWithDropdown
-                    list={itemCraftingStationsDropdownOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Select Building..."
-                    triggerClassName="min-w-[200px]"
-                  />
-                )}
-              />
-            </LabelContainer>
-            <LabelContainer name="Building Tier">
-              <Controller
-                control={control}
-                name={`craftOptions.${i}.building.tier`}
-                render={({ field }) => (
-                  <InputWithDropdown
-                    list={itemTiersDropdownOptions}
-                    value={field.value}
-                    onChange={field.onChange}
-                    placeholder="Select tier..."
-                  />
-                )}
-              />
-            </LabelContainer>
+        <StyledAccordion key={field.id} name={`Option ${i + 1}`} defaultOpen={true} className="flex flex-col gap-2 p-4">
+          <div className="flex flex-wrap items-end gap-6">
+            <div className="flex gap-6">
+              <LabelContainer name="Level">
+                <Controller
+                  control={control}
+                  name={`craftOptions.${i}.level`}
+                  rules={{
+                    required: 'Crafting level is required',
+                  }}
+                  render={({ field }) => (
+                    <Input
+                      type="text"
+                      placeholder="Level"
+                      className="w-[80px]"
+                      {...field}
+                      variant={errors.craftOptions?.[i]?.level ? 'error' : 'default'}
+                    />
+                  )}
+                />
+              </LabelContainer>
+              <LabelContainer name="profession">
+                <Controller
+                  control={control}
+                  name={`craftOptions.${i}.profession`}
+                  render={({ field }) => (
+                    <InputWithDropdown
+                      list={itemCraftingProfessionsDropdownOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Profession..."
+                      triggerClassName="min-w-[150px]"
+                    />
+                  )}
+                />
+              </LabelContainer>
+            </div>
+            <div className="flex gap-6">
+              <LabelContainer name="Tool Name">
+                <Controller
+                  control={control}
+                  name={`craftOptions.${i}.tool.name`}
+                  render={({ field }) => (
+                    <InputWithDropdown
+                      list={itemCraftingToolsDropdownOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Tool..."
+                    />
+                  )}
+                />
+              </LabelContainer>
+              <LabelContainer name="Tool Tier">
+                <Controller
+                  control={control}
+                  name={`craftOptions.${i}.tool.tier`}
+                  render={({ field }) => (
+                    <InputWithDropdown
+                      list={itemTiersDropdownOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select tier..."
+                    />
+                  )}
+                />
+              </LabelContainer>
+            </div>
+            <div className="flex gap-6">
+              <LabelContainer name="Building Name">
+                <Controller
+                  control={control}
+                  name={`craftOptions.${i}.building.name`}
+                  render={({ field }) => (
+                    <InputWithDropdown
+                      list={itemCraftingStationsDropdownOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select Building..."
+                      triggerClassName="min-w-[200px]"
+                    />
+                  )}
+                />
+              </LabelContainer>
+              <LabelContainer name="Building Tier">
+                <Controller
+                  control={control}
+                  name={`craftOptions.${i}.building.tier`}
+                  render={({ field }) => (
+                    <InputWithDropdown
+                      list={itemTiersDropdownOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select tier..."
+                    />
+                  )}
+                />
+              </LabelContainer>
+            </div>
             <div
               tabIndex={0}
+              role="button"
+              aria-label={`Remove crafting option ${i + 1}`}
               className="focus-ring-inset cursor-pointer rounded-md p-2"
               onClick={() => removeCraftingOption(i)}
               onKeyDown={(e) => removeCraftingOption(i, e)}
@@ -199,25 +198,35 @@ export const CraftOptionsTable = ({ itemsArray, control, register, setValue }: C
             </div>
           </div>
 
-          <div className="flex-gap-2 w-full items-start">
+          <div className="flex w-full flex-wrap items-start gap-2">
             {/* Input table */}
-            <div className="flex-col-gap-2 w-full">
+            <div className="flex flex-col gap-2">
               <LabelContainer name="Input" />
-              <Table className="grid-cols-[1fr_100px_--spacing(8)]" data-id={`input-${i}`}>
+              <Table className="grid-cols-[minmax(200px,500px)_100px_--spacing(8)]" data-id={`input-${i}`}>
                 <TableCell isHeader>Item Name</TableCell>
                 <TableCell isHeader>Quantity</TableCell>
                 <TableCell isHeader></TableCell>
-                {field.input.map((input, j) => {
+                {field.input.map((_, j) => {
                   return (
                     <Fragment key={`${field.id}-${j}-input`}>
                       <TableCell>
-                        <SearchableItemTile
-                          suggestions={suggestions}
-                          onChange={handleItemTileSuggestions}
-                          selectedItemId={input.id}
-                          triggerClassName="border-0 rounded-none"
-                          onSelectItem={(item) => handleSelectItem(`craftOptions.${i}.input.${j}.id`, item)}
-                          removeSelectedItemId={() => removeSelectedDependencyItem(`craftOptions.${i}.input.${j}.id`)}
+                        <Controller
+                          control={control}
+                          name={`craftOptions.${i}.input.${j}.id`}
+                          render={({ field }) => (
+                            <SearchableItemTile
+                              suggestions={suggestions}
+                              clearSuggestions={handleClearSuggestions}
+                              selectedItemId={field.value}
+                              onChange={handleItemTileSuggestions}
+                              onSelectItem={(item) => field.onChange(item.id)}
+                              removeSelectedItemId={() => {
+                                field.onChange(null);
+                                setSuggestions(null);
+                              }}
+                              triggerClassName="border-0 rounded-none"
+                            />
+                          )}
                         />
                       </TableCell>
                       <TableCell>
@@ -229,6 +238,8 @@ export const CraftOptionsTable = ({ itemsArray, control, register, setValue }: C
                         />
                       </TableCell>
                       <TableCell
+                        role="button"
+                        aria-label={`Remove crafting input row ${j + 1} from option ${i + 1}`}
                         onClick={() => removeCraftingDependency('input', i, j)}
                         onKeyDown={(e) => removeCraftingDependency('input', i, j, e)}
                         title={field.input.length <= 1 ? 'At least 1 entry required' : ''}
@@ -244,7 +255,7 @@ export const CraftOptionsTable = ({ itemsArray, control, register, setValue }: C
                 <TableCell className="col-span-3">
                   <TableAddRow
                     className="border-t-0"
-                    text="Add new input item"
+                    text={`Add new input item to option ${i + 1}`}
                     onClick={() => addCraftingDependency('input', i)}
                     onKeyDown={(e) => addCraftingDependency('input', i, e)}
                   />
@@ -253,34 +264,49 @@ export const CraftOptionsTable = ({ itemsArray, control, register, setValue }: C
             </div>
 
             {/* Output table */}
-            <div className="flex-col-gap-2 w-full">
+            <div className="flex flex-col gap-2">
               <LabelContainer name="Output" />
-              <Table className="grid-cols-[1fr_100px_--spacing(8)]" data-id={`output-${i}`}>
+              <Table
+                className="auto-cols-1fr grid-cols-[minmax(200px,500px)_100px_--spacing(8)]"
+                data-id={`output-${i}`}
+              >
                 <TableCell isHeader>Item Name</TableCell>
                 <TableCell isHeader>Quantity</TableCell>
                 <TableCell isHeader></TableCell>
-                {field.output.map((input, j) => {
+                {field.output.map((_, j) => {
                   return (
-                    <Fragment key={`${field.id}-${j}-input`}>
+                    <Fragment key={`${field.id}-${j}-output`}>
                       <TableCell>
-                        <SearchableItemTile
-                          suggestions={suggestions}
-                          onChange={handleItemTileSuggestions}
-                          selectedItemId={input.id}
-                          triggerClassName="border-0 rounded-none"
-                          onSelectItem={(item) => handleSelectItem(`craftOptions.${i}.output.${j}.id`, item)}
-                          removeSelectedItemId={() => removeSelectedDependencyItem(`craftOptions.${i}.output.${j}.id`)}
+                        <Controller
+                          control={control}
+                          name={`craftOptions.${i}.output.${j}.id`}
+                          render={({ field }) => (
+                            <SearchableItemTile
+                              suggestions={suggestions}
+                              clearSuggestions={handleClearSuggestions}
+                              selectedItemId={field.value}
+                              onChange={handleItemTileSuggestions}
+                              onSelectItem={(item) => field.onChange(item.id)}
+                              removeSelectedItemId={() => {
+                                field.onChange(null);
+                                setSuggestions(null);
+                              }}
+                              triggerClassName="border-0 rounded-none"
+                            />
+                          )}
                         />
                       </TableCell>
                       <TableCell>
                         <TableInput
-                          type="number"
+                          type="textAsNumber"
                           placeholder="Quantity"
                           className="h-full"
                           {...register(`craftOptions.${i}.output.${j}.quantity` as const)}
                         />
                       </TableCell>
                       <TableCell
+                        role="button"
+                        aria-label={`Remove crafting output row ${j + 1} from option ${i + 1}`}
                         onClick={() => removeCraftingDependency('output', i, j)}
                         onKeyDown={(e) => removeCraftingDependency('output', i, j, e)}
                         title={field.output.length <= 1 ? 'At least 1 entry required' : ''}
@@ -296,7 +322,7 @@ export const CraftOptionsTable = ({ itemsArray, control, register, setValue }: C
                 <TableCell className="col-span-3">
                   <TableAddRow
                     className="border-t-0"
-                    text="Add new output item"
+                    text={`Add new output item to option ${i + 1}`}
                     onClick={() => addCraftingDependency('output', i)}
                     onKeyDown={(e) => addCraftingDependency('output', i, e)}
                   />

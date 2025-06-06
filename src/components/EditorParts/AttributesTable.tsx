@@ -1,6 +1,6 @@
 import { Fragment, type KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
-import type { Control, UseFieldArrayReturn, UseFormRegister } from 'react-hook-form';
+import type { Control, FieldErrors, UseFieldArrayReturn } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Table, TableCell } from '@/components/EditorParts/CustomTable';
 import { TableInput } from '@/components/Inputs';
@@ -9,11 +9,11 @@ import type { ItemForm } from '@/db';
 
 interface AttributesTableProps {
   itemsArray: UseFieldArrayReturn<ItemForm, 'attributes', 'id'>;
-  register: UseFormRegister<ItemForm>;
   control: Control<ItemForm>;
+  errors: FieldErrors<ItemForm>;
 }
 
-export const AttributesTable = ({ itemsArray, control, register }: AttributesTableProps) => {
+export const AttributesTable = ({ itemsArray, control, errors }: AttributesTableProps) => {
   const handleKeyboardDelete = (e: KeyboardEvent<HTMLDivElement>, i: number) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -33,13 +33,36 @@ export const AttributesTable = ({ itemsArray, control, register }: AttributesTab
       {itemsArray.fields.map((field, i) => (
         <Fragment key={field.id}>
           <TableCell>
-            <TableInput type="text" placeholder="Name" {...register(`attributes.${i}.name` as const)} />
+            <Controller
+              control={control}
+              name={`attributes.${i}.name`}
+              rules={{ required: 'Attribute name is required' }}
+              render={({ field }) => (
+                <TableInput type="text" placeholder="Name" {...field} error={errors.attributes?.[i]?.name?.message} />
+              )}
+            />
           </TableCell>
           <TableCell>
-            <TableInput type="textAsNumber" placeholder="Min" {...register(`attributes.${i}.valueMin` as const)} />
+            <Controller
+              control={control}
+              name={`attributes.${i}.valueMin`}
+              rules={{ required: 'Minimal attribute value is required' }}
+              render={({ field }) => (
+                <TableInput
+                  type="textAsNumber"
+                  placeholder="Min"
+                  {...field}
+                  error={errors.attributes?.[i]?.valueMin?.message}
+                />
+              )}
+            />
           </TableCell>
           <TableCell>
-            <TableInput type="textAsNumber" placeholder="Max" {...register(`attributes.${i}.valueMax` as const)} />
+            <Controller
+              control={control}
+              name={`attributes.${i}.valueMax`}
+              render={({ field }) => <TableInput type="textAsNumber" placeholder="Max" {...field} />}
+            />
           </TableCell>
           <TableCell className="p-2">
             <Controller

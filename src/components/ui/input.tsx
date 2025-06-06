@@ -31,8 +31,9 @@ const inputVariants = cva(
     variants: {
       variant: {
         default: 'border-input shadow-xs',
-        destructive: 'border-destructive shadow-xs focus-visible:ring-destructive',
+        destructive: 'focus-ring-inset-destructive',
         ghost: 'border-transparent -mx-3 -my-1',
+        error: 'ring-destructive ring-2 ring-inset',
       },
     },
     defaultVariants: {

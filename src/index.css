@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  interpolate-size: allow-keywords;
   --radius: 0.65rem;
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
@@ -178,6 +179,10 @@
     letter-spacing: var(--tracking-normal);
   }
 
+  div {
+    @apply text-sm;
+  }
+
   *::-webkit-scrollbar {
     width: var(--scrollbar-width);
   }
@@ -193,25 +198,33 @@
   span {
     @apply text-sm;
   }
+
+  /* removing arrows from numeric input */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }
 
 @utility focus-ring {
-  @apply focus-visible:border-ring focus-visible:ring-ring transition-shadow focus-visible:ring-2 focus-visible:outline-hidden;
+  @apply focus-visible:border-ring focus-visible:ring-ring transition-shadow focus-visible:ring-1 focus-visible:outline-hidden;
 }
 
 @utility focus-ring-inset {
-  @apply focus-visible:border-ring focus-visible:ring-ring transition-shadow focus-visible:ring-2 focus-visible:outline-hidden focus-visible:ring-inset;
+  @apply focus-ring focus-visible:ring-inset;
 }
+
+@utility focus-ring-inset-destructive {
+  @apply focus-visible:border-destructive focus-visible:ring-destructive transition-shadow focus-visible:ring-1 focus-visible:outline-hidden focus-visible:ring-inset;
+}
+
 @utility focus-ring-reset {
   @apply transition-shadow focus-visible:border-0 focus-visible:ring-0 focus-visible:outline-hidden focus-visible:ring-inset;
-}
-
-@utility flex-col-gap-* {
-  @apply flex flex-col gap-[--spacing(--value(integer))];
-}
-
-@utility flex-gap-* {
-  @apply flex gap-[--spacing(--value(integer))];
 }
 
 @utility grid-cell-center {

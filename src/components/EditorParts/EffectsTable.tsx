@@ -1,7 +1,13 @@
 import { Fragment } from 'react';
 import type { KeyboardEvent } from 'react';
 import { Trash2 } from 'lucide-react';
-import type { Control, UseFieldArrayReturn, UseFormRegister } from 'react-hook-form';
+import {
+  type Control,
+  Controller,
+  type FieldErrors,
+  type UseFieldArrayReturn,
+  type UseFormRegister,
+} from 'react-hook-form';
 import type { ItemForm } from '@/db';
 import { cn, isSubmitKey } from '@/lib';
 import { TableInput } from '../Inputs';
@@ -9,11 +15,11 @@ import { Table, TableAddRow, TableCell } from './CustomTable';
 
 interface EffectsTableProps {
   itemsArray: UseFieldArrayReturn<ItemForm, 'effects', 'id'>;
-  register: UseFormRegister<ItemForm>;
   control: Control<ItemForm>;
+  errors: FieldErrors<ItemForm>;
 }
 
-export const EffectsTable = ({ itemsArray, register }: EffectsTableProps) => {
+export const EffectsTable = ({ itemsArray, control, errors }: EffectsTableProps) => {
   const handleRemoveEffect = (effectIndex: number, e?: KeyboardEvent<HTMLDivElement>) => {
     if (e && !isSubmitKey(e)) return;
 
@@ -61,7 +67,21 @@ export const EffectsTable = ({ itemsArray, register }: EffectsTableProps) => {
           <Fragment key={field.id}>
             {i !== 0 && <TableCell className="bg-border col-span-5 h-2 border-0"></TableCell>}
             <TableCell className="col-span-4">
-              <TableInput type="text" placeholder="Effect name" {...register(`effects.${i}.name` as const)} />
+              <Controller
+                control={control}
+                name={`effects.${i}.name`}
+                rules={{
+                  required: 'Effect name is required if present',
+                }}
+                render={({ field }) => (
+                  <TableInput
+                    type="text"
+                    placeholder="Effect name"
+                    {...field}
+                    error={errors.effects?.[i]?.name?.message}
+                  />
+                )}
+              />
             </TableCell>
             <TableCell
               onClick={() => handleRemoveEffect(i)}
@@ -78,24 +98,48 @@ export const EffectsTable = ({ itemsArray, register }: EffectsTableProps) => {
                   <div className="bg-muted-foreground h-full w-0.5 justify-self-center"></div>
                 </TableCell>
                 <TableCell>
-                  <TableInput
-                    type="text"
-                    placeholder="Attribute name"
-                    {...register(`effects.${i}.attributes.${j}.name` as const)}
+                  <Controller
+                    control={control}
+                    name={`effects.${i}.attributes.${j}.name`}
+                    rules={{ required: 'Effect attribute name is required' }}
+                    render={({ field }) => (
+                      <TableInput
+                        type="text"
+                        placeholder="Attribute name"
+                        {...field}
+                        error={errors.effects?.[i]?.attributes?.[j]?.name?.message}
+                      />
+                    )}
                   />
                 </TableCell>
                 <TableCell>
-                  <TableInput
-                    type="number"
-                    placeholder="Value"
-                    {...register(`effects.${i}.attributes.${j}.value` as const)}
+                  <Controller
+                    control={control}
+                    name={`effects.${i}.attributes.${j}.value`}
+                    rules={{ required: 'Effect attribute value is required' }}
+                    render={({ field }) => (
+                      <TableInput
+                        type="textAsNumber"
+                        placeholder="Value"
+                        {...field}
+                        error={errors.effects?.[i]?.attributes?.[j]?.value?.message}
+                      />
+                    )}
                   />
                 </TableCell>
                 <TableCell>
-                  <TableInput
-                    type="text"
-                    placeholder="Unit"
-                    {...register(`effects.${i}.attributes.${j}.timeUnit` as const)}
+                  <Controller
+                    control={control}
+                    name={`effects.${i}.attributes.${j}.timeUnit`}
+                    rules={{ required: 'Effect attribute time unit is required' }}
+                    render={({ field }) => (
+                      <TableInput
+                        type="text"
+                        placeholder="Unit"
+                        {...field}
+                        error={errors.effects?.[i]?.attributes?.[j]?.timeUnit?.message}
+                      />
+                    )}
                   />
                 </TableCell>
                 <TableCell

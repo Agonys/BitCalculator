@@ -1,4 +1,4 @@
-import type { Item } from './types';
+import type { Item } from '@/db';
 
 export const mockData: Item[] = [
   {
@@ -6,13 +6,13 @@ export const mockData: Item[] = [
     icon: 'https://i.imgur.com/QY6zecI.png',
     name: 'training shortsword with very long name that exceeds 3 lines of text',
     entityType: 'item',
-    tier: 1,
+    tier: '1',
     rarity: 'common',
     category: 'weapon',
     attributes: [{ name: 'shortsword damage', valueMin: 4, valueMax: 6 }],
     craftOptions: [
       {
-        building: { name: 'workbench', tier: 1 },
+        building: { name: 'workbench', tier: '1' },
         level: 1,
         profession: 'carpentry',
         input: [
@@ -29,7 +29,7 @@ export const mockData: Item[] = [
     id: 'grass-shirt',
     icon: 'https://i.imgur.com/Tsp1Sae.png',
     name: 'grass shirt',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     rarity: 'common',
     category: 'cosmetic clothes',
@@ -43,7 +43,7 @@ export const mockData: Item[] = [
   {
     id: 'grass-waistwrap',
     name: 'grass waistwrap',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     rarity: 'common',
     category: 'cosmetic clothes',
@@ -57,7 +57,7 @@ export const mockData: Item[] = [
   {
     id: 'grass-sandals',
     name: 'grass sandals',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     rarity: 'common',
     category: 'cosmetic clothes',
@@ -79,13 +79,13 @@ export const mockData: Item[] = [
     id: 'basic-clay-lump',
     name: 'basic clay lump',
     rarity: 'common',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     craftOptions: [
       {
         level: 1,
         profession: 'foraging',
-        tool: { name: 'machete', tier: 1 },
+        tool: { name: 'machete', tier: '1' },
         input: [{ id: 'mud-mound', quantity: 1 }],
         output: [
           {
@@ -105,7 +105,7 @@ export const mockData: Item[] = [
     id: 'plain-mushroom-skewer',
     name: 'plain mushroom skewer',
     rarity: 'common',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     category: 'basic food',
     attributes: [{ name: 'saturation', valueMin: 25 }],
@@ -122,8 +122,8 @@ export const mockData: Item[] = [
       {
         level: 1,
         profession: 'cooking',
-        tool: { name: 'pot', tier: 1 },
-        building: { name: 'cooking station', tier: 1 },
+        tool: { name: 'pot', tier: '1' },
+        building: { name: 'cooking station', tier: '1' },
         input: [
           {
             id: 'basic-mushroom',
@@ -139,14 +139,14 @@ export const mockData: Item[] = [
     id: 'flint-tool-bundle',
     name: 'flint tool bundle',
     rarity: 'common',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     category: 'tool bundle',
     craftOptions: [
       {
         level: 1,
         profession: 'carpentry',
-        building: { name: 'workbench', tier: 1 },
+        building: { name: 'workbench', tier: '1' },
         input: [
           {
             id: 'kanpped-flint',
@@ -165,14 +165,14 @@ export const mockData: Item[] = [
     id: 'flint-tool-bundle-2',
     name: 'flint tool bundle II',
     rarity: 'common',
-    tier: 1,
+    tier: '1',
     category: 'tool bundle',
     entityType: 'item',
   },
   {
     id: 'rusty-shortsword',
     name: 'rusty shortsword',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     rarity: 'uncommon',
     category: 'weapon',
@@ -194,7 +194,7 @@ export const mockData: Item[] = [
     id: 'flint-bow',
     name: 'flint bow',
     rarity: 'common',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     category: 'hunter tool',
     attributes: [
@@ -207,7 +207,7 @@ export const mockData: Item[] = [
     craftOptions: [
       {
         level: 1,
-        building: { name: 'workbench', tier: 1 },
+        building: { name: 'workbench', tier: '1' },
         profession: 'carpentry',
         input: [
           {
@@ -227,7 +227,7 @@ export const mockData: Item[] = [
     id: 'flint-hammer',
     name: 'flint hammer',
     rarity: 'common',
-    tier: 1,
+    tier: '1',
     entityType: 'item',
     category: 'blacksmith tool',
     attributes: [
@@ -243,7 +243,7 @@ export const mockData: Item[] = [
         level: 1,
         building: {
           name: 'workbench',
-          tier: 1,
+          tier: '1',
         },
         input: [
           { id: 'knapped-flint', quantity: 1 },

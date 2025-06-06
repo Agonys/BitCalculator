@@ -3,25 +3,42 @@ import { cn } from '@/lib/utils';
 
 interface TableInputProps extends ComponentProps<'input'> {
   type: 'text' | 'textAsNumber' | 'number';
+  error?: string;
 }
-export const TableInput = ({ className, type, ...props }: TableInputProps) => {
+export const TableInput = ({ className, type, error, ...props }: TableInputProps) => {
   const typeSpecificProps = useMemo<Partial<ComponentProps<'input'>>>(() => {
     if (type === 'textAsNumber')
       return {
         pattern: `^-?\\d*\\.?\\d*$`,
         inputMode: 'decimal',
+        type: 'text',
       };
 
-    return {};
+    if (type === 'number') {
+      return {
+        min: 1,
+        type,
+      };
+    }
+
+    return {
+      type,
+    };
   }, [type]);
 
   return (
     <input
-      type="text"
+      // type="text"
       placeholder={props.placeholder}
-      {...typeSpecificProps}
       {...props}
-      className={cn('w-full p-2 outline-0', 'focus-ring-inset', 'placeholder:text-muted-foreground/45', className)}
+      {...typeSpecificProps}
+      title={error}
+      className={cn(
+        'w-full p-2 outline-0',
+        'focus-ring-inset placeholder:text-muted-foreground/45',
+        error && 'focus-ring-inset-destructive ring-destructive ring-1 ring-inset',
+        className,
+      )}
     />
   );
 };

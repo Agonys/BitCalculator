@@ -16,47 +16,25 @@ export const Table = ({ className, children, ...props }: ComponentProps<'div'>) 
   </div>
 );
 
-export const TableHeader = ({ className, children, ...props }: ComponentProps<'div'>) => (
-  <div
-    role="columnheader"
-    className={cn(
-      'bg-muted sticky top-0 z-10 col-span-full grid grid-cols-[inherit] [&>div]:border-r-0 [&>div]:p-2',
-      className,
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-);
-
-export const TableRow = ({ className, children, ...props }: ComponentProps<'div'>) => (
-  <div
-    role="row"
-    className={cn('col-span-full grid grid-cols-[inherit]', 'border-b last:border-b-0', className)}
-    {...props}
-  >
-    {children}
-  </div>
-);
-
 interface TableCellProps extends ComponentProps<'div'> {
   isHeader?: boolean;
 }
 
-export const TableCell = ({ className, children, isHeader, ...props }: TableCellProps) => (
+export const TableCell = ({ className, children, isHeader, onClick, ...props }: TableCellProps) => (
   <div
-    {...(props.onClick && { tabIndex: 0 })}
-    role={props.onClick ? 'button' : 'cell'}
+    {...(onClick && { tabIndex: 0 })}
+    role={onClick ? 'button' : isHeader ? 'columnheader' : 'cell'}
     className={cn(
       'grid-cell-center h-full items-center border-r border-b last:border-r-0',
       {
-        'focus-ring-inset cursor-pointer': props.onClick,
+        'focus-ring-inset cursor-pointer': onClick,
       },
       {
         'bg-muted border-b-muted-foreground/10 sticky top-0 z-10 h-full border-r-0 p-2': isHeader,
       },
       className,
     )}
+    onClick={onClick}
     {...props}
   >
     {children}
@@ -86,9 +64,10 @@ export const TableAddRow = ({ className, onClick, onKeyDown, text = 'Add new' }:
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      role="presentation"
+      role="button"
+      aria-label={text}
       className={cn(
-        'focus-ring-inset flex-gap-2 w-full cursor-pointer items-center justify-center p-2 transition-colors',
+        'focus-ring-inset flex w-full cursor-pointer items-center justify-center gap-2 p-2 transition-colors',
         'text-muted-foreground hover:text-primary focus-visible:text-primary',
         className,
       )}

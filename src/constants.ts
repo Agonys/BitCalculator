@@ -1,6 +1,6 @@
 import { createDropdownOptionsFromList } from './lib';
 
-export const itemTiers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+export const itemTiers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const;
 export const itemRarities = ['common', 'uncommon', 'rare', 'epic', 'legendary'] as const;
 export const itemCategories = [
   'weapon',
@@ -31,7 +31,7 @@ export const craftingProfessions = [
 ] as const;
 
 export const craftingStations = [
-  'tailoring station tailoring station tailoring station tailoring station',
+  'tailoring station',
   'smelter',
   'fishing station',
   'grinder',

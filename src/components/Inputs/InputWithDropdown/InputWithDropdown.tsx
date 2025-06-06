@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { Separator } from '@/components/ui/separator';
@@ -15,21 +15,18 @@ interface DropdownProps {
   placeholder: string;
   value?: string | number;
   triggerClassName?: string;
+  hasError?: boolean;
   onChange?: (value: string | number) => void;
 }
 
-interface DropdownPortalProps {
-  top: number;
-  left: number;
-  minWidth: number;
-  maxWidth: number;
-}
+type PortalCSSProps = CSSProperties & Record<string, string | number>;
 
 export const InputWithDropdown: React.FC<DropdownProps> = ({
   list,
   placeholder,
   value,
   triggerClassName,
+  hasError,
   onChange,
 }) => {
   const [open, setOpen] = useState(false); // controls transition state
@@ -38,29 +35,33 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
   const [highlighted, setHighlighted] = useState(0);
 
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const triggerRef = useRef<HTMLDivElement | null>(null);
-  const dropdownPortalRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const dropdownPortalRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [dropdownPortalPos, setdropdownPortalPos] = useState<DropdownPortalProps>({
+  const [dropdownPortalPos, setdropdownPortalPos] = useState<PortalCSSProps>({
     top: 0,
     left: 0,
+    transform: '',
     minWidth: 0,
     maxWidth: 0,
+    transformOrigin: '',
   }); // required for creating portal on top of everything
 
   const containerRef = useClickOutside<HTMLDivElement>(() => {
-    closeDropdown();
+    if (open) {
+      closeDropdown();
+    }
   }, [triggerRef, dropdownPortalRef]);
 
   const filtered = list.filter((item) => item.label.toLowerCase().includes(search.toLowerCase()));
 
   const openDropdown = () => {
+    updateDropdownPosition();
     setShow(true);
     // Next tick, set open to true to trigger transition
     setTimeout(() => {
       setOpen(true);
-
-      updateDropdownPosition();
     }, 10);
   };
 
@@ -68,7 +69,13 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
     setOpen(false);
     setSearch('');
     setHighlighted(0);
-    triggerRef.current?.focus();
+    // triggerRef.current?.focus();
+  };
+
+  const scrollToHighlighted = (highlightedIndex: number) => {
+    if (!itemRefs.current) return;
+
+    itemRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -86,12 +93,18 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
     }
 
     switch (key) {
-      case 'ArrowDown':
-        setHighlighted((h) => valueClamp(h + 1, 0, filtered.length - 1));
+      case 'ArrowDown': {
+        const highlightedIndex = valueClamp(highlighted + 1, 0, filtered.length - 1);
+        setHighlighted(highlightedIndex);
+        scrollToHighlighted(highlightedIndex);
         break;
-      case 'ArrowUp':
-        setHighlighted((h) => Math.max(h - 1, 0));
+      }
+      case 'ArrowUp': {
+        const highlightedIndex = Math.max(highlighted - 1, 0);
+        setHighlighted(highlightedIndex);
+        scrollToHighlighted(highlightedIndex);
         break;
+      }
       case 'Enter':
         if (!filtered[highlighted]) return;
         handleSelect(filtered[highlighted].value);
@@ -118,11 +131,29 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
     if (!triggerRef.current) return;
 
     const rect = triggerRef.current.getBoundingClientRect();
+    const margin = 4;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const dropdownHeight = dropdownPortalRef.current?.clientHeight || 0;
+
+    let openUpwards = false;
+    if (dropdownHeight > spaceBelow && spaceAbove > spaceBelow) {
+      openUpwards = true;
+    }
+
+    const translateYPos = openUpwards ? rect.top - dropdownHeight - margin : rect.top + rect.height + margin;
+
+    if (dropdownPortalRef.current) {
+      dropdownPortalRef.current.dataset['openDirection'] = openUpwards ? 'up' : 'down';
+    }
+
     setdropdownPortalPos({
-      top: rect.bottom + window.scrollY,
-      left: rect.left + window.scrollX,
-      minWidth: rect.width,
-      maxWidth: Math.min(rect.width * 2, 500),
+      '--dropdown-input-root-width': rect.width + 'px',
+      '--dropdown-input-root-height': rect.height + 'px',
+      '--dropdown-input-root-top': rect.top + 'px',
+      '--dropdown-input-root-left': rect.left + 'px',
+      transform: `translate(${rect.left}px, ${translateYPos}px)`,
     });
   };
 
@@ -134,17 +165,21 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
     }
   }, [open, show]);
 
+  useEffect(() => {
+    if (open && show) {
+      searchInputRef.current?.focus();
+    }
+  }, [open, show]);
+
   // Handle resizing and scrolling window so we can move currently open dropdown.
   useEffect(() => {
     if (!show) return;
 
     const handle = () => updateDropdownPosition();
 
-    // Listen for scroll and resize
     window.addEventListener('scroll', handle, true);
     window.addEventListener('resize', handle);
 
-    // Listen for trigger resize
     let observer: ResizeObserver | undefined;
     if (triggerRef.current) {
       observer = new window.ResizeObserver(handle);
@@ -161,71 +196,74 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
 
   // Scrolls to highlighted option if selection is off the screen (too far from the top or bottom).
   useEffect(() => {
-    if (show && itemRefs.current[highlighted]) {
+    if (show && open && itemRefs.current[highlighted]) {
       itemRefs.current[highlighted]?.scrollIntoView({ block: 'nearest' });
     }
-  }, [highlighted, show, filtered.length]);
-
-  // useEffect(() => {
-
-  // }, [show]);
+  }, [highlighted, show, filtered.length, open]);
 
   const selectedLabel = useMemo(() => list.find((item) => item.value === value)?.label || '', [value, list]);
 
   const dropdownPortalContent = show ? (
     <div
+      style={{ ...dropdownPortalPos }}
       className={cn(
-        'border-input bg-popover absolute right-0 left-0 z-20 mt-1 flex w-min flex-col overflow-hidden rounded-md border text-sm shadow-lg',
-        'transform transition-[scale,opacity] duration-150 ease-in-out',
-        open ? 'pointer-events-auto scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0',
+        'fixed top-0 left-0 z-20 min-w-max text-sm',
+        'animate-(--animate-enter) transition-[opacity] ease-in-out',
+        'pointer-events-none opacity-0',
+        open && 'pointer-events-auto opacity-100',
       )}
       ref={dropdownPortalRef}
-      style={{ ...dropdownPortalPos }}
     >
-      <div className="flex items-center gap-3 p-3">
-        <Search size={16} className="text-muted-foreground shrink-0" />
-        <input
-          autoFocus
-          type="text"
-          name="dropdownInput"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => {
-            console.log(e);
-            setSearch(e.target.value);
-            setHighlighted(0);
-          }}
-          onKeyDown={handleKeyDown}
-          className="focus-ring-reset h-min w-full border-0 bg-transparent p-0 text-white"
-        />
-      </div>
-      <Separator />
-      <div tabIndex={-1} className="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto p-1 py-2">
-        {filtered.length === 0 && <div className="text-muted-foreground px-3 py-2 select-none">No option found.</div>}
-        {filtered.map((item, i) => (
-          <div
-            key={item.value}
-            ref={(el) => {
-              itemRefs.current[i] = el;
+      <div
+        className={cn(
+          'border-input bg-popover flex w-min min-w-(--dropdown-input-root-width) flex-col overflow-hidden rounded-md border shadow-lg transition-[scale] ease-in-out',
+          open ? 'scale-100' : 'scale-95',
+        )}
+      >
+        <div className="flex items-center gap-3 p-3">
+          <Search size={16} className="text-muted-foreground shrink-0" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            name="dropdownInput"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setHighlighted(0);
             }}
-            role="option"
-            title={item.label}
-            aria-selected={value === item.value}
-            onMouseDown={() => handleSelect(item.value)}
-            onMouseEnter={() => setHighlighted(i)}
-            className={cn(
-              `hover:bg-accent flex h-fit cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2`,
-              highlighted === i && 'bg-accent',
-            )}
-          >
-            <span className="line-clamp-2">{item.label}</span>
-            {value === item.value && (
-              <span className="text-muted-foreground">
-                <Check size={16} />
-              </span>
-            )}
-          </div>
-        ))}
+            onKeyDown={handleKeyDown}
+            className="focus-ring-reset h-min w-full border-0 bg-transparent p-0 text-white"
+          />
+        </div>
+        <Separator />
+        <div tabIndex={-1} className="max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto p-1 py-2">
+          {filtered.length === 0 && <div className="text-muted-foreground px-3 py-2 select-none">No option found.</div>}
+          {filtered.map((item, i) => (
+            <div
+              key={item.value}
+              ref={(el) => {
+                itemRefs.current[i] = el;
+              }}
+              role="option"
+              title={item.label}
+              aria-selected={value === item.value}
+              onMouseDown={() => handleSelect(item.value)}
+              onMouseEnter={() => setHighlighted(i)}
+              className={cn(
+                `hover:bg-accent flex h-fit cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2`,
+                highlighted === i && 'bg-accent',
+              )}
+            >
+              <span className="line-clamp-2">{item.label}</span>
+              {value === item.value && (
+                <span className="text-muted-foreground">
+                  <Check size={16} />
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   ) : null;
@@ -241,6 +279,7 @@ export const InputWithDropdown: React.FC<DropdownProps> = ({
           'truncate overflow-hidden whitespace-nowrap',
           'focus-ring-inset border-input hover:bg-accent text-muted-foreground text-sm transition-[background-color,border-color]',
           selectedLabel && 'text-white',
+          hasError && 'ring-destructive ring-2 ring-inset',
           triggerClassName,
         )}
         title={selectedLabel}

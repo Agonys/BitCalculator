@@ -13,13 +13,13 @@ export const ItemTile = ({ item, className, onClick }: ItemTileProps) => {
   return (
     <div
       className={cn(
-        'flex-gap-2 hover:bg-sidebar-accent/30 h-full w-full min-w-[300px] cursor-pointer items-center rounded-md px-2 py-1.5 transition-colors',
+        'hover:bg-sidebar-accent/30 flex h-full w-full min-w-[300px] cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors',
         className,
       )}
       onClick={() => onClick?.(item)}
     >
       <img src={item.icon} alt={`${item.name}`} className="h-9 w-9 shrink-0 object-contain" />
-      <div className="flex-col-gap-1 w-full min-w-0 text-xs font-medium capitalize">
+      <div className="flex w-full min-w-0 flex-col gap-1 text-xs font-medium capitalize">
         <div className="flex w-full justify-between gap-2 overflow-hidden">
           <span className="line-clamp-1 max-w-[240px] min-w-0 text-ellipsis whitespace-normal" title={item.name}>
             {item.name}
@@ -28,8 +28,8 @@ export const ItemTile = ({ item, className, onClick }: ItemTileProps) => {
           <span className="shrink-0 text-[#867557]">{item.rarity}</span>
         </div>
         <div className="text-muted-foreground flex w-full justify-between">
-          <span>Tier {numberToRoman(item.tier)}</span>
-          <span>{item.category}</span>
+          {item.tier && <span>Tier {numberToRoman(item.tier)}</span>}
+          <span className="ml-auto">{item.category}</span>
         </div>
       </div>
     </div>

@@ -9,10 +9,22 @@ interface LabelContainerProps {
 }
 
 export const LabelContainer = ({ name, className, children }: LabelContainerProps) => {
-  const hasDirectInputElement = isValidElement(children) ? children.type === 'input' : false;
+  let hasDirectInputElement = false;
+  if (isValidElement(children)) {
+    hasDirectInputElement = children.type === 'input';
+  }
+
+  if (Array.isArray(children)) {
+    const isSomeValid = children.some(
+      (child) => (isValidElement(child) && child.type === 'input') || child.type.name === 'Controller',
+    );
+    hasDirectInputElement = isSomeValid;
+  }
+
+  // const hasDirectInputElement = isValidElement(children) ? children.type === 'input' : false;
   const Component = hasDirectInputElement ? Label : 'span';
   return (
-    <Component className={cn('flex-col-gap-2 w-full items-start', className)}>
+    <Component className={cn('flex w-full flex-col items-start gap-2', className)}>
       <span className="w-full capitalize">{name}</span>
       {children}
     </Component>

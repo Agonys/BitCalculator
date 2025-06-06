@@ -22,7 +22,7 @@ export type TimeUnits = (typeof itemEffectTimeUnits)[number];
 export type EntityType = (typeof entityTypes)[number];
 
 export interface ItemRequirement {
-  level: number | '';
+  level: number;
   skill?: string;
 }
 export interface ItemAttribute {
@@ -44,7 +44,7 @@ export interface ItemEffect {
 }
 
 export interface ItemCraftOption {
-  level: number | '';
+  level: number;
   profession: CraftingProfessions;
   building?: {
     name: CrafingBuildings;
@@ -64,16 +64,16 @@ export interface ItemMaterial {
 }
 
 export interface Item {
-  icon?: string;
   id: string;
   name: string;
-  tier?: ItemTiers;
   rarity: ItemRarities;
   category: ItemCategories;
   entityType: EntityType;
+  icon?: string;
+  tier?: ItemTiers;
+  effects?: ItemEffect[];
   attributes?: ItemAttribute[];
   requirements?: ItemRequirement[];
-  effects?: ItemEffect[];
   craftOptions?: ItemCraftOption[];
 }
 

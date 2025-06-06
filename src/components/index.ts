@@ -10,8 +10,6 @@ export {
   EffectsTable,
   CraftOptionsTable,
   Table,
-  TableHeader,
-  TableRow,
   TableCell,
   TableAddRow,
 } from './EditorParts';
